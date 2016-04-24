@@ -1,0 +1,15 @@
+div(id="modal1" class="modal")
+    form(method="post" action="login")
+        div(class="modal-content")
+            h4 Entrar
+            div(class="row")
+                div(class="input-field col s12")
+                    input(id="username" type="text")
+                    label(for="username") Nombre de usuario
+                div(class="input-field col s12")
+                    input(id="passwd" type="password")
+                    label(for="passwd") Contraseña
+        div(class="modal-footer")
+            button(class="btn waves-effect waves-light margin-left" type="submit" name="action") Entrar
+                i(class="material-icons right") send
+            a(href="#!" class="modal-action modal-close waves-effect btn-flat") Cerrar

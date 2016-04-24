@@ -1,0 +1,26 @@
+.margin-top {
+  margin-top: 1.5em !important; }
+
+.margin-left {
+  margin-left: 1.5em !important; }
+
+.margin-bottom {
+  margin-bottom: 1.5em !important; }
+
+.margin-right {
+  margin-right: 1.5em !important; }
+
+.clear {
+  clear: both; }
+
+.clearfix:before, .clearfix:after {
+  content: " ";
+  display: table; }
+
+.clearfix:after {
+  clear: both; }
+
+.bold a {
+  font-weight: bold; }
+
+/*# sourceMappingURL=style.css.map */
