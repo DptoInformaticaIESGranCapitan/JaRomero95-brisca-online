@@ -7,10 +7,11 @@ var pool  = mysql.createPool({
     database        : 'exchange2'
 });
 
-function query(callback, sql, params){
+function exec(callback, sql, params){
     var result = undefined;
     sql = mysql.format(sql, params);
     pool.getConnection(function(err, connection) {
+        // FIXME no se ha podido conectar con la base de datos
         connection.query(sql, function(err, rows) {
             if(err)
                 console.error(err);
@@ -20,4 +21,4 @@ function query(callback, sql, params){
     });
 }
 
-module.exports = query;
+module.exports = exec;
