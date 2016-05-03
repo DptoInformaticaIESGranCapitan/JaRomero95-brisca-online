@@ -1,22 +1,26 @@
 extends layout
-
+// COMPROBACIONES DEL FORMULARIO
 block content
     div(class="row")
         h2(class="red-text text-darken-3 center") Registro
         form(class="col s12 m8 offset-m2" method="post" action="#")
             div(class="row")
                 div(class="input-field col s12 l6")
-                    input(name="realname" id="realname" type="text")
-                    label(for="realname") Nombre
+                    input(name="name" id="name" type="text")
+                    label(for="name") Nombre
                 div(class="input-field col s12 l6")
-                    input(name="apellidos" id="apellidos" type="text")
-                    label(for="apellidos") Apellidos
+                    input(name="lastName" id="lastName" type="text")
+                    label(for="lastName") Apellidos
                 div(class="input-field col s12 l6")
                     input(name="username" id="username" type="text")
                     label(for="username") Nombre de usuario
                 div(class="input-field col s12 l6")
-                    input(name="born" id="born" type="date" class="datepicker")
-                    label(for="born") Fecha de nacimiento
+                    // FIXME validar email
+                    input(name="email" id="email" type="email")
+                    label(for="email") Correo electrónico
+                div(class="input-field col s12 l6")
+                    input(name="date" id="date" type="date" class="datepicker")
+                    label(for="date") Fecha de nacimiento
                 div(class="input-field col s12 l6")
                     input(name="passwd" id="passwd" type="password")
                     label(for="passwd") Contraseña
