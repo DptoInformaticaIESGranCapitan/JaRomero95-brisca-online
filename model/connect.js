@@ -12,6 +12,10 @@ function exec(callback, sql, params){
     sql = mysql.format(sql, params);
     pool.getConnection(function(err, connection) {
         // FIXME no se ha podido conectar con la base de datos
+        if(!connection){
+            callback(undefined);
+            return;
+        }
         connection.query(sql, function(err, rows) {
             if(err)
                 console.error(err);

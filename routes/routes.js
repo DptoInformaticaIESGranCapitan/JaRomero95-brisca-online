@@ -14,7 +14,8 @@ router.get('/registro', function (req, res, next) {
 });
 
 router.post('/registro', function (req, res, next) {
-    console.log(req.body);
+    var realname = req.body.realname;
+    console.log(realname);
     res.render('register');
 });
 
