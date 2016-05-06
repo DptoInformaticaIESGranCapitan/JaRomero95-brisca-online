@@ -1,6 +1,4 @@
 wreck_them:
-    resource: "@WreckThemBundle/Controller/"
-    type:     annotation
+    resource: "@WreckThemBundle/Resources/config/routing.yml"
     prefix:   /
-
 
