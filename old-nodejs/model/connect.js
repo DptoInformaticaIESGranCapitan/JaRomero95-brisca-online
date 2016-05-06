@@ -1,28 +1,28 @@
 var mysql = require('mysql');
+var Q = require('q');
+
 var pool  = mysql.createPool({
     connectionLimit : 10,
     host            : 'localhost',
     user            : 'root',
     password        : '',
-    database        : 'exchange2'
+    database        : 'wreck-them'
 });
 
-function exec(callback, sql, params){
-    var result = undefined;
+function exec(sql, params){
+    params = params || [];
+    var deferred = Q.defer();
     sql = mysql.format(sql, params);
     pool.getConnection(function(err, connection) {
         // FIXME no se ha podido conectar con la base de datos
-        if(!connection){
-            callback(undefined);
-            return;
-        }
         connection.query(sql, function(err, rows) {
             if(err)
-                console.error(err);
+                deferred.reject(err);
             connection.release();
-            callback(rows);
+            deferred.resolve(rows);
         });
     });
+    return deferred.promise;
 }
 
 module.exports = exec;
