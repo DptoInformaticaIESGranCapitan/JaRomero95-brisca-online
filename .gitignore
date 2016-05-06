@@ -1,3 +1,11 @@
 old-nodejs/node_modules
-.idea/
+.buildpath
+.project
+.settings
+nbproject
+.idea
+.tm_properties
 wreck-them/vendor
+wreck-them/app/cache
+wreck-them/app/logs
+wreck-them/app/bootstrap.php.cache

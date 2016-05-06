@@ -1,3 +1,6 @@
-app:
-    resource: "@AppBundle/Controller/"
+wreck_them:
+    resource: "@WreckThemBundle/Controller/"
     type:     annotation
+    prefix:   /
+
+
