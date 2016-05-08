@@ -8,7 +8,9 @@
 
     {% set user = app.user %}
     {% if user %}
-        Bienvenido {{ user.email }}. <a href="/logout">Cerrar sesión</a>
+        Bienvenido {{ user.email }}
+        <a href="{{ path('perfil') }}">Perfil</a>
+        <a href="{{ path('logout') }}">Cerrar sesión</a>
     {% else %}
         <a href="{{ path('login') }}">Entrar</a>
         <a href="{{ path('register') }}">Registrarse</a>

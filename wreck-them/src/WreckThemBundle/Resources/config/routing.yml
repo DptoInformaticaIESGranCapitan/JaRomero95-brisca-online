@@ -10,5 +10,9 @@ login:
     path:     /entrar
     defaults: { _controller: WreckThemBundle:User:login }
 
+perfil:
+    path:     /perfil
+    defaults: { _controller: WreckThemBundle:User:perfil }
+
 logout:
   path: /logout

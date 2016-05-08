@@ -1,0 +1,17 @@
+{% extends 'WreckThemBundle:Page:layout.html.twig' %}
+
+{% block content %}
+    {{ form_start(form) }}
+    {{ form_row(form.email) }}
+    {#{{ form_row(form.plainPassword.first) }}#}
+    {#{{ form_row(form.plainPassword.second) }}#}
+
+    <button type="submit">Guardar cambios</button>
+    {{ form_end(form) }}
+
+    {{ form_start(formPasswd) }}
+    {{ form_row(formPasswd.plainPassword.first) }}
+    {{ form_row(formPasswd.plainPassword.second) }}
+    <button type="submit">Cambiar cambios</button>
+    {{ form_end(formPasswd) }}
+{% endblock %}

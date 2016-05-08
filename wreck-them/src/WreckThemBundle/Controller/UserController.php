@@ -1,9 +1,10 @@
 <?php
 namespace WreckThemBundle\Controller;
 
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use WreckThemBundle\Form\UserType;
+use WreckThemBundle\Form\PasswordUserType;
 use WreckThemBundle\Entity\User;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -41,6 +42,52 @@ class UserController extends Controller
         );
     }
 
+    public function perfilAction(Request $request)
+    {
+        // 1) build the form
+        $user = $this->getUser();
+        $form = $this->createForm(UserType::class, $user)
+            ->remove('plainPassword');
+
+        $formPasswd = $this->createForm(PasswordUserType::class, $user);
+
+        // 2) handle the submit (will only happen on POST)
+        $form->handleRequest($request);
+        $formPasswd->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+//            TODO flash éxito!
+            // ... do any other work - like sending them an email, etc
+            // maybe set a "flash" success message for the user
+        }elseif ($formPasswd->isSubmitted() && $formPasswd->isValid()) {
+            $passwordOriginal = $formPasswd->getData()->getPassword();
+            if (null == $user->getPassword()) {
+                $user->setPassword($passwordOriginal);
+            } else {
+                // 3) Encode the password (you could also do this via Doctrine listener)
+                $password = $this->get('security.password_encoder')
+                    ->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($password);
+            }
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+//            TODO flash éxito!
+            // ... do any other work - like sending them an email, etc
+            // maybe set a "flash" success message for the user
+        }
+
+        return $this->render('WreckThemBundle:User:perfil.html.twig',
+            array(
+                'form' => $form->createView(),
+                'formPasswd' => $formPasswd->createView()
+            )
+        );
+    }
+
     public function loginAction(Request $request)
     {
         $authenticationUtils = $this->get('security.authentication_utils');
@@ -56,7 +103,7 @@ class UserController extends Controller
             array(
                 // last username entered by the user
                 'last_username' => $lastUsername,
-                'error'         => $error,
+                'error' => $error,
             )
         );
     }
