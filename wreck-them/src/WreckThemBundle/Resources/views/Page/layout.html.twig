@@ -9,6 +9,13 @@
     {% set user = app.user %}
     {% if user %}
         Bienvenido {{ user.email }}
+
+        {% if user.imgPath %}
+            <img src="{{ asset('uploads/images' ~ user.imgPath ) }}" alt="Foto de perfil">
+        {% else %}
+            no image
+        {% endif %}
+
         <a href="{{ path('perfil') }}">Perfil</a>
         <a href="{{ path('logout') }}">Cerrar sesión</a>
     {% else %}

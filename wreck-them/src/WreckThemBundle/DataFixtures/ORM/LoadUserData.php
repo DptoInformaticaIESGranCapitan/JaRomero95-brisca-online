@@ -18,9 +18,9 @@ class LoadUserData implements FixtureInterface, ContainerAwareInterface
     public function load(ObjectManager $manager)
     {
         $users = array(
-            array('email'=>'em1@mail.com', 'plainPassword'=>'1111'),
-            array('email'=>'em2@mail.com', 'plainPassword'=>'1111'),
-            array('email'=>'em3@mail.com', 'plainPassword'=>'1111')
+            array('email'=>'em1@mail.com', 'plainPassword'=>'1111', 'nick'=>'user1'),
+            array('email'=>'em2@mail.com', 'plainPassword'=>'1111', 'nick'=>'user2'),
+            array('email'=>'em3@mail.com', 'plainPassword'=>'1111', 'nick'=>'user3')
         );
 
         foreach($users as $user){
@@ -29,6 +29,7 @@ class LoadUserData implements FixtureInterface, ContainerAwareInterface
             $password = $encoder->encodePassword($entity, $user['plainPassword']);
             $entity->setPassword($password);
             $entity->setEmail($user['email']);
+            $entity->setNick($user['nick']);
             $manager->persist($entity);
             $manager->flush();
         }

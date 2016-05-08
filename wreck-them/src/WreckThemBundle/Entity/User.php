@@ -3,15 +3,17 @@
 namespace WreckThemBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity
- * @UniqueEntity(fields="email", message="Email already taken")
+ * @UniqueEntity(fields="email", message="Ya existe una cuenta con ese email")
+ * @UniqueEntity(fields="nick", message="Ya existe una cuenta con ese nombre de usuario")
  */
-class User implements UserInterface
+class User implements UserInterface, \Serializable
 {
     /**
      * @var int
@@ -26,8 +28,101 @@ class User implements UserInterface
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=255, unique=true)
+     * @Assert\NotBlank(message = "Debe rellenar este campo")
      */
     private $email;
+
+    /**
+     * @var UploadedFile
+     * @Assert\Image(
+     *     maxSize = "500k",
+     *     maxSizeMessage = "El tamaño máximo de archivo es de 500 Kb"
+     * )
+     */
+    protected $img;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    protected $imgPath;
+
+    /**
+     * @return string
+     */
+    public function getImgPath()
+    {
+        return $this->imgPath;
+    }
+
+    /**
+     * @param string $imgPath
+     */
+    public function setImgPath($imgPath)
+    {
+        $this->imgPath = $imgPath;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImg()
+    {
+        return $this->img;
+    }
+
+    /**
+     * @param mixed $img
+     */
+    public function setImg(UploadedFile $img)
+    {
+        $this->img = $img;
+    }
+
+    public function uploadImg(){
+        if (null === $this->img) {
+            return;
+        }
+        $destiny = __DIR__.'/../../../../web/uploads/images';
+        $nameImg = $this->nick . 'image'. $this->img->getExtension();
+        $this->img->move($destiny, $nameImg);
+        $this->setImgPath($nameImg);
+    }
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nick", type="string", length=15, unique=true)
+     * @Assert\NotBlank
+     * FIXME no muestra el error de la exp regular, pero sí funciona
+     * @Assert\Regex(
+     *     pattern="/\w+/",
+     *     message="El nombre de usuario solo puede contener letras, números y guiones bajos"
+     * )
+     * @Assert\Length(
+     *     min=4,
+     *     max=15,
+     *     minMessage="El nombre de usuario debe contener al menos 4 caracteres",
+     *     maxMessage="El nombre de usuario debe contener como máximo caracteres"
+     * )
+     */
+    private $nick;
+
+    /**
+     * @return string
+     */
+    public function getNick()
+    {
+        return $this->nick;
+    }
+
+    /**
+     * @param string $nick
+     */
+    public function setNick($nick)
+    {
+        $this->nick = $nick;
+    }
 
     /**
      * @var string
@@ -90,6 +185,8 @@ class User implements UserInterface
 
         return $this;
     }
+
+
 
     /**
      * Get password
@@ -163,6 +260,32 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         // TODO: Implement eraseCredentials() method.
+    }
+
+    /** @see \Serializable::serialize() */
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+            $this->nick,
+            $this->email,
+            $this->imgPath,
+            $this->password,
+            $this->plainPassword,
+        ));
+    }
+
+    /** @see \Serializable::unserialize() */
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->nick,
+            $this->email,
+            $this->imgPath,
+            $this->password,
+            $this->plainPassword
+            ) = unserialize($serialized);
     }
 }
 

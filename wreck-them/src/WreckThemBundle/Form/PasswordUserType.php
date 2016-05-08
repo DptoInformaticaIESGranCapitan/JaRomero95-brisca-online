@@ -17,6 +17,7 @@ class PasswordUserType extends AbstractType
         $builder
             ->add('plainPassword', RepeatedType::class, array(
                     'type' => PasswordType::class,
+                    'invalid_message' => 'Las contraseñas deben coincidir',
                     'first_options'  => array('label' => 'Password'),
                     'second_options' => array('label' => 'Repeat Password'),
                 )

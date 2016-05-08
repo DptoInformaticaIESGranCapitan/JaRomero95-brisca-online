@@ -27,6 +27,7 @@ class UserController extends Controller
 
             // 4) save the User!
             $em = $this->getDoctrine()->getManager();
+            $user->uploadImg();
             $em->persist($user);
             $em->flush();
 
@@ -56,6 +57,8 @@ class UserController extends Controller
         $formPasswd->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $user->uploadImg();
+            var_dump($user);
             $em->persist($user);
             $em->flush();
 //            TODO flash éxito!
@@ -79,6 +82,7 @@ class UserController extends Controller
             // ... do any other work - like sending them an email, etc
             // maybe set a "flash" success message for the user
         }
+
 
         return $this->render('WreckThemBundle:User:perfil.html.twig',
             array(
