@@ -3,14 +3,15 @@
 namespace WreckThemBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * User
- *
- * @ORM\Table(name="user")
- * @ORM\Entity(repositoryClass="WreckThemBundle\Repository\UserRepository")
+ * @ORM\Entity
+ * @UniqueEntity(fields="email", message="Email already taken")
  */
-class User
+class User implements UserInterface
 {
     /**
      * @var int
@@ -24,23 +25,9 @@ class User
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=12, unique=true)
+     * @ORM\Column(name="email", type="string", length=255, unique=true)
      */
-    private $name;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="firstName", type="string", length=50)
-     */
-    private $firstName;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="lastName", type="string", length=100)
-     */
-    private $lastName;
+    private $email;
 
     /**
      * @var string
@@ -50,38 +37,16 @@ class User
     private $password;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="string", length=255)
+     * @Assert\NotBlank()
+     * @Assert\Length(max=4096)
      */
-    private $email;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="salt", type="string", length=255)
-     */
-    private $salt;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="dob", type="date")
-     */
-    private $dob;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="createdAt", type="date")
-     */
-    private $createdAt;
+    private $plainPassword;
 
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return int
      */
     public function getId()
     {
@@ -89,101 +54,10 @@ class User
     }
 
     /**
-     * Set name
-     *
-     * @param string $name
-     * @return User
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string 
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set firstName
-     *
-     * @param string $firstName
-     * @return User
-     */
-    public function setFirstName($firstName)
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    /**
-     * Get firstName
-     *
-     * @return string 
-     */
-    public function getFirstName()
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * Set lastName
-     *
-     * @param string $lastName
-     * @return User
-     */
-    public function setLastName($lastName)
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    /**
-     * Get lastName
-     *
-     * @return string 
-     */
-    public function getLastName()
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * Set password
-     *
-     * @param string $password
-     * @return User
-     */
-    public function setPassword($password)
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * Get password
-     *
-     * @return string 
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    /**
      * Set email
      *
      * @param string $email
+     *
      * @return User
      */
     public function setEmail($email)
@@ -196,7 +70,7 @@ class User
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
     public function getEmail()
     {
@@ -204,69 +78,91 @@ class User
     }
 
     /**
-     * Set salt
+     * Set password
      *
-     * @param string $salt
+     * @param string $password
+     *
      * @return User
      */
-    public function setSalt($salt)
+    public function setPassword($password)
     {
-        $this->salt = $salt;
+        $this->password = $password;
 
         return $this;
     }
 
     /**
-     * Get salt
+     * Get password
      *
-     * @return string 
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword($password)
+    {
+        $this->plainPassword = $password;
+    }
+
+    /**
+     * Returns the roles granted to the user.
+     *
+     * <code>
+     * public function getRoles()
+     * {
+     *     return array('ROLE_USER');
+     * }
+     * </code>
+     *
+     * Alternatively, the roles might be stored on a ``roles`` property,
+     * and populated in any number of different ways when the user object
+     * is created.
+     *
+     * @return (Role|string)[] The user roles
+     */
+    public function getRoles()
+    {
+        return array('ROLE_USER');
+    }
+
+    /**
+     * Returns the salt that was originally used to encode the password.
+     *
+     * This can return null if the password was not encoded using a salt.
+     *
+     * @return string|null The salt
      */
     public function getSalt()
     {
-        return $this->salt;
+        return null;
     }
 
     /**
-     * Set dob
+     * Returns the username used to authenticate the user.
      *
-     * @param \DateTime $dob
-     * @return User
+     * @return string The username
      */
-    public function setDob($dob)
+    public function getUsername()
     {
-        $this->dob = $dob;
-
-        return $this;
+        return $this->email;
     }
 
     /**
-     * Get dob
+     * Removes sensitive data from the user.
      *
-     * @return \DateTime 
+     * This is important if, at any given point, sensitive information like
+     * the plain-text password is stored on this object.
      */
-    public function getDob()
+    public function eraseCredentials()
     {
-        return $this->dob;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     * @return User
-     */
-    public function setCreatedAt()
-    {
-        $this->createdAt = new \DateTime();
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime 
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
+        // TODO: Implement eraseCredentials() method.
     }
 }
+

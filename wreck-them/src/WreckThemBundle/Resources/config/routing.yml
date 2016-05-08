@@ -1,3 +1,14 @@
-wreck_them_homepage:
+homepage:
     path:     /
     defaults: { _controller: WreckThemBundle:Page:index }
+
+register:
+    path:     /registro
+    defaults: { _controller: WreckThemBundle:User:register }
+
+login:
+    path:     /entrar
+    defaults: { _controller: WreckThemBundle:User:login }
+
+logout:
+  path: /logout

@@ -2,23 +2,41 @@
 # http://symfony.com/doc/current/book/security.html
 security:
 
+    encoders:
+        WreckThemBundle\Entity\User: bcrypt
+
     # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+#    providers:
+#        our_db_provider:
+#            entity:
+#                class: AppBundle:User
+#                property: username
+#                # if you're using multiple entity managers
+#                # manager_name: customer
+    access_control:
+        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/*, roles: ROLE_USER }
+
+
+
     providers:
-        in_memory:
-            memory: ~
+        our_db_provider:
+            entity:
+                class: WreckThemBundle:User
+                property: email
+                # if you're using multiple entity managers
+                # manager_name: customer
+
 
     firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-
         main:
+            provider: our_db_provider
             anonymous: ~
-            # activate different ways to authenticate
-
-            # http_basic: ~
-            # http://symfony.com/doc/current/book/security.html#a-configuring-how-your-users-will-authenticate
-
-            # form_login: ~
-            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            form_login:
+                login_path: login
+                check_path: login
+            logout:
+                path:   /logout
+                target: /

@@ -8,6 +8,6 @@ class PageController extends Controller
 {
     public function indexAction()
     {
-        return $this->render('WreckThemBundle::index.html.twig');
+        return $this->render('WreckThemBundle:Page:index.html.twig');
     }
 }

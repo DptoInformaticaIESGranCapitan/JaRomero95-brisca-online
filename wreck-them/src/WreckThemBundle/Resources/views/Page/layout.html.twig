@@ -1,0 +1,25 @@
+{% extends 'WreckThemBundle:Page:base.html.twig' %}
+
+{% block body %}
+    {% block header %}
+        <h1>Wreck Them</h1>
+    {% endblock %}
+
+
+    {% set user = app.user %}
+    {% if user %}
+        Bienvenido {{ user.email }}. <a href="/logout">Cerrar sesión</a>
+    {% else %}
+        <a href="{{ path('login') }}">Entrar</a>
+        <a href="{{ path('register') }}">Registrarse</a>
+    {% endif %}
+
+
+    {% block content %}
+
+    {% endblock %}
+
+    {% block footer %}
+
+    {% endblock %}
+{% endblock %}
