@@ -1,3 +1,4 @@
+{% set user = app.user %}
 <!doctype html>
 <html lang="es">
 <head>
@@ -13,10 +14,40 @@
     {% endblock %}
 </head>
 <body>
+
+
 {% block body %}{% endblock %}
 {% block scripts %}
     <script src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+
+    {% if user %}
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+    <script>
+        $(function(){
+            var socket = io('http://localhost:3000');
+            $('form').submit(function(){
+                socket.emit('chat message', $('#m').val(), User);
+                $('#m').val('');
+                return false;
+            });
+            socket.on('chat message', function(msg){
+                $('#messages').append($('<li>').text(msg));
+            });
+
+            socket.on('new user', function(User){
+                $('#messages').append($('<li>').text('Usuario conectado:' + User.name));
+            });
+
+            var User = {
+                email: '{{ user.email }}',
+                name: '{{ user.nick }}'
+            };
+            socket.emit('new user', User);
+        })
+    </script>
+    {% endif %}
 {% endblock %}
 </body>
 </html>

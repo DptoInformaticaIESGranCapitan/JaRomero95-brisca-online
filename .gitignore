@@ -6,3 +6,4 @@ wreck-them/var/logs
 wreck-them/var/sessions
 wreck-them/var/bootstrap.php.cache
 wreck-them/web/bundles/framework
+node/node_modules
