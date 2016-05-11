@@ -11,6 +11,7 @@ Game.prototype.addPlayer = function(player){
         if(this.players.length == 4){
             this.start = true;
             this.io.sockets.in(this.id).emit('start');
+            //TODO notificar a los usuarios que están en la partida de que se ha unido uno nuevo
         }
     }
 };
