@@ -1,7 +1,8 @@
 $(function () {
-    var socket = io('http://localhost:3000');
+    socket.emit('join', name);
+
     $('form').submit(function () {
-        socket.emit('msg', $('#m').val(), User);
+        socket.emit('msg', $('#m').val(), name);
         $('#m').val('');
         return false;
     });
@@ -17,6 +18,4 @@ $(function () {
             '<strong>' + user + ' se ha conectado al chat</strong>'
         ));
     });
-
-    socket.emit('join general chat', User);
 });

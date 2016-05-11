@@ -23,14 +23,14 @@
 
     {% if user %}
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
     <script>
-        {# Carga los datos del usuario actual en una variable global para posteriormente usarla en el resto de scripts #}
-        var User = {
-            email: '{{ user.email }}',
-            name: '{{ user.nick }}'
-        };
+        var name = '{{ user.nick }}';
     </script>
-    <script src="{{ asset('js/chat-general.js') }}"></script>
+
+    <script src="{{ asset('js/init-socket.js') }}"></script>
+    <script src="{{ asset('js/c-chat-general.js') }}"></script>
+    <script src="{{ asset('js/c-search-game.js') }}"></script>
     {% endif %}
 {% endblock %}
 </body>

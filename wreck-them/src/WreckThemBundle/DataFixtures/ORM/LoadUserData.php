@@ -20,7 +20,9 @@ class LoadUserData implements FixtureInterface, ContainerAwareInterface
         $users = array(
             array('email'=>'em1@mail.com', 'plainPassword'=>'1111', 'nick'=>'user1'),
             array('email'=>'em2@mail.com', 'plainPassword'=>'1111', 'nick'=>'user2'),
-            array('email'=>'em3@mail.com', 'plainPassword'=>'1111', 'nick'=>'user3')
+            array('email'=>'em3@mail.com', 'plainPassword'=>'1111', 'nick'=>'user3'),
+            array('email'=>'em4@mail.com', 'plainPassword'=>'1111', 'nick'=>'user4'),
+            array('email'=>'em5@mail.com', 'plainPassword'=>'1111', 'nick'=>'user5')
         );
 
         foreach($users as $user){
