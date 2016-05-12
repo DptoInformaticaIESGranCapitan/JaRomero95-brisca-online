@@ -14,5 +14,9 @@ perfil:
     path:     /perfil
     defaults: { _controller: WreckThemBundle:User:perfil }
 
+play:
+    path:     /jugar
+    defaults: { _controller: WreckThemBundle:Page:play }
+
 logout:
   path: /logout

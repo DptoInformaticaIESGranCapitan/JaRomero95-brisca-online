@@ -14,6 +14,4 @@ $(function () {
         if(window.location.pathname != '/jugar')
             window.location = '/jugar';
     });
-
-    console.log(window.location);
 });

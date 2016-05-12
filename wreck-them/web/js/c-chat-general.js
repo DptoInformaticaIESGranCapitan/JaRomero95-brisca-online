@@ -1,9 +1,14 @@
 $(function () {
+    var $m = $('#m');
+
     socket.emit('join', name);
 
     $('form').submit(function () {
-        socket.emit('msg', $('#m').val(), name);
-        $('#m').val('');
+        var val = $m.val();
+        if(val){
+            socket.emit('msg', val, name);
+            $m.val('');
+        }
         return false;
     });
 

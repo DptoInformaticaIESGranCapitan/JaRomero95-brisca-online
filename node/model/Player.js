@@ -1,10 +1,8 @@
 function Player(name){
     this.name = name;
     this.cards = [];
+    this.jail = false;
+    this.position = 0;
 }
-
-Player.prototype.a = function(){
-
-};
 
 module.exports = Player;

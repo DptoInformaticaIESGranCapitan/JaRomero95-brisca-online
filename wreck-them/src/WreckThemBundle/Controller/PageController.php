@@ -10,4 +10,9 @@ class PageController extends Controller
     {
         return $this->render('WreckThemBundle:Page:index.html.twig');
     }
+
+    public function playAction()
+    {
+        return $this->render('WreckThemBundle:Game:game.html.twig');
+    }
 }

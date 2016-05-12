@@ -1,5 +1,10 @@
 {% extends 'WreckThemBundle:Page:layout.html.twig' %}
 
+{% block scripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('js/game/c-game.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <table>
     <tr>
