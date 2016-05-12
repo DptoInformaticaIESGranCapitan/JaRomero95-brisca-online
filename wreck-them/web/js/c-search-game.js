@@ -11,6 +11,9 @@ $(function () {
 
     socket.on('start', function () {
         console.log('Comienza la partida');
-        window.location = '/jugar';
+        if(window.location.pathname != '/jugar')
+            window.location = '/jugar';
     });
+
+    console.log(window.location);
 });

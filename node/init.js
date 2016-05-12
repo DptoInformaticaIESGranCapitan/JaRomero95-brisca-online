@@ -49,7 +49,7 @@ var init = function (io) {
             // le notifico al jugador si tiene una partida en curso
             var idGame = user.game;
             if(idGame){
-                global.games[idGame].notify(user);
+                global.games[idGame].isStart(user);
             }
 
             console.log('Conectado: ' + name);
