@@ -4,10 +4,14 @@ var io = require('socket.io')(http);
 
 var init = require('./init')(io);
 
-var searchGame = require('./search-game.js')(io);
+require('./search-game.js')(io);
 
 global.onlineUsers = [];
 global.games = [];
+global.io = io;
+
+//console.log(io);
+//console.log(global.io);
 
 
 

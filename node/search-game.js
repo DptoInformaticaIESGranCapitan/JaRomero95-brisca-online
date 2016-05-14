@@ -1,7 +1,7 @@
 var Game = require('./model/Game.js');
 
 var searchGame = function (io) {
-
+    'use strict';
     var actual;
 
     io.on('connection', function (socket) {
@@ -32,10 +32,34 @@ var searchGame = function (io) {
             console.log('Añadido el jugador ' + user.name + ' a la partida ' + actual.id);
 
             // inicio otra partida para la próxima petición si esta ya ha empezado
-            if(actual.start)
+            if (actual.start)
                 actual = new Game();
 
         });
+
+        socket.on('roll', function (name, idGame) {
+            var game = global.games[idGame];
+            // TODO cuando empiece la partida
+        });
+
+        /**
+         * Establece al usuario que lo envía como listo y le envía sus datos.
+         */
+        socket.on('ready', function (idGame, name) {
+            var game = global.games[idGame];
+            if (game) {
+                var player = game.getPlayer(name);
+                player.ready = true;
+                console.log('El usuario ' + name + ' está listo');
+                socket.emit('start data', game.players, game.properties);
+                // Si la partida no había empezado ya, comprueba si todos están listo
+                if (game.ready === false)
+                    game.checkReady();
+            }
+        });
+
+        //TODO socket.on comprar/
+        // TODO socket.on subastar
 
     });
 

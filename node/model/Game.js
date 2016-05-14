@@ -1,27 +1,33 @@
 var dices = require('./Dices.js')();// instancio este objeto, para todas las partidas
 var Player = require('./Player.js');//recibo el constructor
+var Chrono = require('./Chrono.js');//recibo el constructor
 var ArrayProperties = require('./Property.js');//recibo un objeto con todas las propiedades creadas
 
+var numPlayers = 2;
+
 function Game(io) {
+    'use strict';
     this.io = io;
     this.id = new Date().getTime();
     this.users = {};
     this.players = [];
     this.numUsers = 0;
     this.start = false;
+    this.ready = false;
+    this.turn = 0;
+    this.chrono = new Chrono(this);
 
     //TODO this.states = estados: seleccionando turno, jugando, finalizada
 
     this.properties = new ArrayProperties();
-
-    this.handlerEvents(); // Inicio una vez el manejador de eventos
 }
 
 Game.prototype.addUser = function (player) {
-    if (this.numUsers < 4) {
+    'use strict';
+    if (this.numUsers < numPlayers) {
         this.users[player.name] = player;
         ++this.numUsers;
-        if (this.numUsers == 4) {
+        if (this.numUsers == numPlayers) {
             this.start = true;
             this.startGame();
             this.io.sockets.in(this.id).emit('start');
@@ -31,11 +37,15 @@ Game.prototype.addUser = function (player) {
 };
 
 Game.prototype.isStart = function (name) {
+    'use strict';
     if (this.start)
         this.notify(name, 'start');
 };
 
 Game.prototype.startGame = function () {
+    'use strict';
+
+    this.io.sockets.in(this.id).emit('algo');
     // TODO creo players a partir de los users (array indexado, para controlar el orden y el turno), notifico al usuario para que comience a realizar acciones (tirar)
     var user, users = this.users;
     for (user in users) {
@@ -48,13 +58,23 @@ Game.prototype.startGame = function () {
 };
 
 Game.prototype.notify = function (name, event) {
+    'use strict';
     var user = global.onlineUsers[name];
     if(user)
         if (this.users[name])
             user.socket.emit(event);
 };
 
+Game.prototype.notifyAll = function (event, data) {
+    'use strict';
+    for (var i = 0; i < this.players.length; i++) {
+        var player = this.players[i];
+        global.onlineUsers[player.name].socket.emit(event, data);
+    }
+};
+
 Game.prototype.handlerPlayerAction = function () {
+    'use strict';
     //TODO las variables usadas no existen
     var user; // actual user
     var position = playerActual.position;
@@ -102,30 +122,55 @@ Game.prototype.handlerPlayerAction = function () {
 };
 
 Game.prototype.roll = function (name) {
+    'use strict';
     // TODO se invoca cuando el jugador da la orden de tirar. Hago una tirada. Muevo al jugador a la casilla correspondiente e invoco a un manejador que seleccione que debe hacer el usuario (le pregunto si desea comprar, o subastar, o le cobro, o le envío a la cárcel...)
 
     // Tras la tirada, compruebo si previa a la tirada estaba en un número mayor que después de la tirada, por ejemplo paso de 35 a 7. Esto significa que se ha pasado por salida y se debe cobrar el pago.
 };
 
-// Eventos que recibe la partida
-Game.prototype.handlerEvents = function (){
+Game.prototype.checkReady = function(){
+    'use strict';
+    var allReady = 0;
+    for (var i = 0; i < this.players.length; i++) {
+        var player = this.players[i];
+        if(player.ready)
+            ++allReady;
+    }
+    // Tras comprobar si todos están listos, indico quien inicia el turno
+    console.log('Listos ' + allReady + ' de ' + numPlayers + ' jugadores totales');
+    if(allReady === numPlayers){
+        this.ready = true;
+        console.log('Todos están listos, envía el primer turno');
+        this.sendTurn();
+    }
+};
 
-    var that = this;
+Game.prototype.sendTurn = function(){
+    'use strict';
+    // Establezco el turno
+    if(this.turn < this.players.length-1)
+        ++this.turn;
+    else
+        this.turn = 0;
 
-    this.io.on('connection', function (socket) {
 
-        socket.on('roll', function (name, idGame) {
-            var game = global.games[idGame];
-            // TODO cuando empiece la partida
-        });
+    // Emito el turno
+    this.notifyAll('aTurn', this.players[this.turn]);
+    console.log('Emito el turno al jugador :' + this.turn + ', nombre: '+this.players[this.turn].name);
 
-        socket.on('ready', function () {
-            socket.emit('start data', that.players, that.properties);
-        });
+    //Inicio un cronómetro, y cuando acabe, vuelvo a emitir el turno
+    this.chrono.init(8, this.sendTurn);
+};
 
-        //TODO socket.on comprar/
-        // TODO socket.on subastar
-    });
+Game.prototype.getPlayer = function(name){
+    'use strict';
+    for (var i = 0; i < this.players.length; i++) {
+        var player = this.players[i];
+        if(player.name == name)
+            return player;
+    }
+    console.error('El player es null, esto no debería ocurrir');
+    return null;
 };
 
 module.exports = Game;
