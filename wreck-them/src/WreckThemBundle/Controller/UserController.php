@@ -12,6 +12,7 @@ class UserController extends Controller
 {
     public function registerAction(Request $request)
     {
+        // FIXME denegar acceso al registro a usuarios logueados
         // 1) build the form
         $user = new User();
         $form = $this->createForm(UserType::class, $user);

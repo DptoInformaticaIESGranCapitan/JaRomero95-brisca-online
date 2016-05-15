@@ -9,8 +9,7 @@ $(function () {
         console.log('Recibo los datos de inicio');
     });
 
-    socket.on('aTurn', function (player) {
-        alert('recibo un turno');
+    socket.on('turn', function (player) {
         if (player.name === name)
             console.log('El turno es mío');
         else

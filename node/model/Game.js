@@ -16,6 +16,7 @@ function Game(io) {
     this.ready = false;
     this.turn = 0;
     this.chrono = new Chrono(this);
+    this.lastRoll = 0;
 
     //TODO this.states = estados: seleccionando turno, jugando, finalizada
 
@@ -44,8 +45,6 @@ Game.prototype.isStart = function (name) {
 
 Game.prototype.startGame = function () {
     'use strict';
-
-    this.io.sockets.in(this.id).emit('algo');
     // TODO creo players a partir de los users (array indexado, para controlar el orden y el turno), notifico al usuario para que comience a realizar acciones (tirar)
     var user, users = this.users;
     for (user in users) {
@@ -73,21 +72,20 @@ Game.prototype.notifyAll = function (event, data) {
     }
 };
 
-Game.prototype.handlerPlayerAction = function () {
+Game.prototype.handlerPlayerAction = function (player) {
     'use strict';
-    //TODO las variables usadas no existen
-    var user; // actual user
-    var position = playerActual.position;
+    var position = player.position;
 
     switch (position) {
-        case 0:
-        case 10:
-        case 20:
-            //TODO (salida, carcel visita, parking gratuito) no hago nada, la 0, el cobrar, lo gestiono al pasar, no al caer en ella
+        case 0: // salida
+        case 10: // cárcel, visita
+        case 20: // parking gratuito
             break;
-        case 38://10000
-        case 4://20000
-            // se debe pagar un impuesto, aunque es diferente según la casilla
+        case 38:// impuesto 10000
+            this.pay(10000);
+            break;
+        case 4:// impuesto 20000
+            this.pay(20000);
             break;
         case 2:
         case 17:
@@ -109,8 +107,8 @@ Game.prototype.handlerPlayerAction = function () {
                 var owner = property.owner;
                 if (owner) {
                     // Compruebo si el usuario que ha caído no es el mismo que el propietario, de ser así debe pagar
-                    if (user != owner) {
-                        property.pay(user, roll);
+                    if (player != owner) {
+                        property.pay(player, roll); // El número sacado puede ser necesario
                         // TODO emit evento nuevo sueldo del usuario
                     }
                 } else {
@@ -121,11 +119,27 @@ Game.prototype.handlerPlayerAction = function () {
     }
 };
 
-Game.prototype.roll = function (name) {
-    'use strict';
-    // TODO se invoca cuando el jugador da la orden de tirar. Hago una tirada. Muevo al jugador a la casilla correspondiente e invoco a un manejador que seleccione que debe hacer el usuario (le pregunto si desea comprar, o subastar, o le cobro, o le envío a la cárcel...)
+Game.prototype.pay = function (player, amount) {
+    player.money -= amount;
+    // check bankruptcy
+    this.notifyAll('pay', player);
+};
 
-    // Tras la tirada, compruebo si previa a la tirada estaba en un número mayor que después de la tirada, por ejemplo paso de 35 a 7. Esto significa que se ha pasado por salida y se debe cobrar el pago.
+Game.prototype.receive = function (player, amount) {
+    player.money += amount;
+    this.notifyAll('receive', player);
+};
+
+Game.prototype.roll = function (player) {
+    'use strict';
+    var result = dices.roll(),
+        initial = player.position;
+    this.lastRoll = result;// Se guarda por si luego es necesario
+    player.move(result);
+    if(player.position < initial){
+        this.receive(player, 20000); // cobra por pasar por salida
+    }
+    this.handlerPlayerAction(player);
 };
 
 Game.prototype.checkReady = function(){
@@ -145,21 +159,28 @@ Game.prototype.checkReady = function(){
     }
 };
 
-Game.prototype.sendTurn = function(){
+Game.prototype.changeTurn = function(){
     'use strict';
     // Establezco el turno
     if(this.turn < this.players.length-1)
         ++this.turn;
     else
         this.turn = 0;
+};
 
-
+Game.prototype.sendTurn = function(){
     // Emito el turno
-    this.notifyAll('aTurn', this.players[this.turn]);
+    'use strict';
+    this.notifyAll('turn', this.players[this.turn]);
     console.log('Emito el turno al jugador :' + this.turn + ', nombre: '+this.players[this.turn].name);
 
     //Inicio un cronómetro, y cuando acabe, vuelvo a emitir el turno
-    this.chrono.init(8, this.sendTurn);
+    this.chrono.init(20, this.players[this.turn]);
+};
+
+Game.prototype.autoAction = function(player){
+    'use strict';
+    this.roll(player);
 };
 
 Game.prototype.getPlayer = function(name){

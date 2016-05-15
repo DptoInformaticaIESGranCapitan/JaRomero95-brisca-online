@@ -5,6 +5,7 @@ var searchGame = function (io) {
     var actual;
 
     io.on('connection', function (socket) {
+        console.log(socket);
 
         // FIXME extraer algunas líneas al método addUser de Game
         socket.on('search game', function (name) {
