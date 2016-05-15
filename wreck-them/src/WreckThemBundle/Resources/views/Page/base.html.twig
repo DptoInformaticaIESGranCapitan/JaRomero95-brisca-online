@@ -29,11 +29,90 @@
 
     <script>
         var name = '{{ user.nick }}';
+
+        $(function () {
+            var socket = io('http://localhost:3000');
+
+            function initGame(){
+                $action1.prop('disabled', true);
+                $action1.click(function(){
+                    socket.emit('action1');
+                    $action1.prop('disabled', true);
+                });
+            }
+
+            var $m = $('#m'),
+                    $search = $('#search-game'),
+                    $action1 = $('#action1');
+
+            socket.emit('join', name);
+
+            $('form').submit(function () {
+                var val = $m.val();
+                if (val) {
+                    socket.emit('msg', val, name);
+                    $m.val('');
+                }
+                return false;
+            });
+
+            socket.on('msg', function (msg) {
+                $('#messages').append($('<li>').html(
+                        '<strong>' + msg.user + ':</strong> ' + msg.msg
+                ));
+            });
+
+            socket.on('new user', function (user) {
+                $('#messages').append($('<li>').html(
+                        '<strong>' + user + ' se ha conectado al chat</strong>'
+                ));
+            });
+
+            $search.click(function () {
+                socket.emit('search game');
+                $search.prop('disabled', true);
+            });
+
+            socket.on('game', function (idGame) {
+                console.log('Te has unido a la sala: ' + idGame);
+            });
+
+            socket.on('begin', function () {
+                $search.prop('disabled', true);
+                console.log('¡Comienza la partida!');
+//                if(window.location.pathname != '/jugar')
+//                    window.location = '/jugar';
+            });
+
+            socket.on('players', function (players) {
+                console.log('Se han recibido los jugadores: ' + players);
+            });
+
+            socket.on('properties', function (properties) {
+                console.log('Se han recibido las propiedades: ' + properties);
+            });
+
+            socket.on('turn', function (player, time) {
+                if (player === name){
+                    console.log('El turno es mío');
+                    $action1.prop('disabled', false);
+                }
+                else{
+                    console.log('El turno es de: ' + player);
+                    $action1.prop('disabled', true);
+                }
+
+                console.log('Tiempo: ' + time);
+            });
+
+            initGame();
+        });
     </script>
 
-    <script src="{{ asset('js/init-socket.js') }}"></script>
-    <script src="{{ asset('js/c-chat-general.js') }}"></script>
-    <script src="{{ asset('js/c-search-game.js') }}"></script>
+    {#<script src="{{ asset('js/init-socket.js') }}"></script>#}
+    {#<script src="{{ asset('js/c-chat-general.js') }}"></script>#}
+    {#<script src="{{ asset('js/c-search-game.js') }}"></script>#}
+
     {% endif %}
 {% endblock %}
 </body>

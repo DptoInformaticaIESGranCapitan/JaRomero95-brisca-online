@@ -4,8 +4,9 @@ var searchGame = function (io) {
     'use strict';
     var actual;
 
+    console.log('Nuevo socket conectado');
+
     io.on('connection', function (socket) {
-        console.log(socket);
 
         // FIXME extraer algunas líneas al método addUser de Game
         socket.on('search game', function (name) {
@@ -38,6 +39,19 @@ var searchGame = function (io) {
 
         });
 
+        socket.on('disconnect', function (name) {
+            // se recoge el objeto jugador completo
+            var user = global.onlineUsers[name],
+                game = global.games[user.game];
+
+            if(game && user){
+                if(!game.start){
+                    game.removeUser();
+                }
+            }
+
+        });
+
         socket.on('roll', function (name, idGame) {
             var game = global.games[idGame];
             // TODO cuando empiece la partida
@@ -57,6 +71,58 @@ var searchGame = function (io) {
                 if (game.ready === false)
                     game.checkReady();
             }
+        });
+
+        /**
+         * Envía el mensaje recibido a todos los que se encuentran en el chat general
+         */
+        socket.on('msg', function (msg, user) {
+            io.sockets.in('general chat').emit('msg', {
+                    user: user,
+                    msg: msg
+                }
+            );
+            console.log(user + ': ' + msg);
+        });
+
+        /**
+         * Añade al nuevo usuario conectado al chat y a la lista
+         */
+        socket.on('join', function (name) {
+            socket.join('general chat');
+
+            //mensaje a todos en la sala de chat, salvo quien lo envía
+            socket.broadcast.to('general chat').emit('new user', name);
+
+            // mensaje a todos, incluido quien lo envía
+            //io.sockets.in('general chat').emit('new user', User.name);
+
+            // compruebo si existe ya como usuario conectado
+            var user = global.onlineUsers[name];
+            if(!user){
+                // si no existe, lo creo
+                user = {
+                    name: name
+                };
+            }else{
+                // si existe, elimino su socket antiguo
+                user.socket = '';
+            }
+
+            // finalmente le envío su objeto usuario
+            socket.emit('user', user);
+
+            // y lo añado junto con su socket a los usuarios online
+            user.socket = socket;
+            global.onlineUsers[name] = user;
+
+            // le notifico al jugador si tiene una partida en curso
+            var idGame = user.game;
+            if(idGame){
+                global.games[idGame].isStart(user.name);
+            }
+
+            console.log('Conectado: ' + name);
         });
 
         //TODO socket.on comprar/

@@ -7,4 +7,5 @@ wreck-them/var/sessions
 wreck-them/var/bootstrap.php.cache
 wreck-them/web/bundles/framework
 node/node_modules
+node2/node_modules
 node/npm-debug.log

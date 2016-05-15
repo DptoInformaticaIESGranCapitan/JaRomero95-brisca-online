@@ -37,6 +37,11 @@ Game.prototype.addUser = function (player) {
     }
 };
 
+Game.prototype.removeUser = function (user) {
+    'use strict';
+    delete this.users[user.name];
+};
+
 Game.prototype.isStart = function (name) {
     'use strict';
     if (this.start)
@@ -45,7 +50,7 @@ Game.prototype.isStart = function (name) {
 
 Game.prototype.startGame = function () {
     'use strict';
-    // TODO creo players a partir de los users (array indexado, para controlar el orden y el turno), notifico al usuario para que comience a realizar acciones (tirar)
+    // creo un player para cada usuario en la partida
     var user, users = this.users;
     for (user in users) {
         if (users.hasOwnProperty(user))
@@ -150,6 +155,7 @@ Game.prototype.checkReady = function(){
         if(player.ready)
             ++allReady;
     }
+
     // Tras comprobar si todos están listos, indico quien inicia el turno
     console.log('Listos ' + allReady + ' de ' + numPlayers + ' jugadores totales');
     if(allReady === numPlayers){
