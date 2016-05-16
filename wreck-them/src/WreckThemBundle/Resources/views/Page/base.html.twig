@@ -77,19 +77,11 @@
                 console.log('Te has unido a la sala: ' + idGame);
             });
 
-            socket.on('begin', function () {
+            socket.on('begin', function (data1, data2) {
                 $search.prop('disabled', true);
-                console.log('¡Comienza la partida!');
+                console.log('¡Comienza la partida!', data1, data2);
 //                if(window.location.pathname != '/jugar')
 //                    window.location = '/jugar';
-            });
-
-            socket.on('players', function (players) {
-                console.log('Se han recibido los jugadores: ' + players);
-            });
-
-            socket.on('properties', function (properties) {
-                console.log('Se han recibido las propiedades: ' + properties);
             });
 
             socket.on('turn', function (player, time) {

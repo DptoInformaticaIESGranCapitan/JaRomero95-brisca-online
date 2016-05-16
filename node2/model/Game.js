@@ -1,7 +1,7 @@
 var dices = require('./Dices.js')();// instancio este objeto, para todas las partidas
 var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
-var ArrayProperties = require('./Property.js');//recibo un objeto con todas las propiedades creadas
+var Deck = require('./Deck.js');//recibo el constructor
 
 var numPlayers = 2;
 
@@ -16,11 +16,7 @@ function Game(io) {
     this.ready = false;
     this.turn = 0;
     this.chrono = new Chrono(this);
-    this.lastRoll = 0;
-
-    //TODO this.states = estados: seleccionando turno, jugando, finalizada
-
-    this.properties = new ArrayProperties();
+    this.deck = new Deck();
 }
 
 Game.prototype.addUser = function (player) {
@@ -54,18 +50,14 @@ Game.prototype.init = function () {
 
 Game.prototype.sendLateGame = function (name) {
     'use strict';
-    this.notifyAll('begin');
-    this.notify(name, 'players', this.players);
-    this.notify(name, 'properties', this.properties);
+    this.notifyAll('begin', this.players, this.deck);
     this.notify(name, 'turn', this.players[this.turn].name, this.chrono.rest);
 };
 
 
 Game.prototype.sendInitInfo = function () {
     'use strict';
-    this.notifyAll('begin');
-    this.notifyAll('players', this.players);
-    this.notifyAll('properties', this.properties);
+    this.notifyAll('begin', this.players, this.deck);
 
     this.moveTurn();
 };
