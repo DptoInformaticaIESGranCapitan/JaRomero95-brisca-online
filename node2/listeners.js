@@ -79,8 +79,9 @@ var listeners = function (io) {
             var user = global.getUserBySocket(socket);
             if (user) {
                 console.log('Se ha desconectado: ' + user.name);
-                user.connect = false;
                 removeUserFromGame(user);
+                user.connect = false;
+                user.game = undefined;
             } else {
                 console.log('Alguien se ha desconectado');
             }

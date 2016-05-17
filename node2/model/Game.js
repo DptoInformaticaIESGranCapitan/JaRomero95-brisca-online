@@ -17,6 +17,9 @@ function Game(io) {
     this.turn = 0;
     this.chrono = new Chrono(this);
     this.deck = new Deck();
+
+    // almacena la muestra
+    this.sample = this.deck.cards.pop();
 }
 
 Game.prototype.addUser = function (player) {
@@ -42,40 +45,68 @@ Game.prototype.init = function () {
     var user, users = this.users;
     for (user in users) {
         if (users.hasOwnProperty(user)) {
-            this.players.push(new Player(users[user].name))
+            this.players.push(new Player(users[user].name));
         }
     }
     this.sendInitInfo();
 };
 
 Game.prototype.sendLateGame = function (name) {
+    // fixme enviar la información necesaria en función de sendInitInfo
     'use strict';
-    this.notifyAll('begin', this.players, this.deck);
-    this.notify(name, 'turn', this.players[this.turn].name, this.chrono.rest);
 };
 
+Game.prototype.distribute = function () {
+    'use strict';
+    var i, j, player, card;
+    for (i = 0; i < this.players.length; ++i) {
+        player = this.players[i];
+        // a cada jugador, le reparto y ENVÍO 3 cartas
+        for (j = 0; j < 3; ++j) {
+            card = this.deck.cards.pop();
+            player.cards.push(card);
+
+            // extraer método para notificar las cartas
+            this.notify(player.name, 'card', card);
+            this.notifyAll('oponnent card', player.name);
+        }
+    }
+};
 
 Game.prototype.sendInitInfo = function () {
     'use strict';
-    this.notifyAll('begin', this.players, this.deck);
-
-    this.moveTurn();
+    console.log('Comienza la partida: ' + this.id);
+    this.notifyAll('begin', this.players);
+    //this.setTurn();
+    this.distribute();
 };
-
+//
 Game.prototype.removeUser = function (user) {
     'use strict';
-    if (!this.start)
+    if (!this.start){
         delete this.users[user.name];
+        --this.numUsers;
+        console.log('Se ha eliminado a ' + user.name + ' de la partida ' + this.id);
+    }
 };
 
+/**
+ * Envío información al websocket de un usuario
+ * @param name nombre del usuario que debe recibir la información
+ * @param event nombre del evento que recibirá
+ * @param data1 información
+ * @param data2 información
+ * @param data3 información
+ * @param data4 información
+ */
 Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
     'use strict';
-    console.log('envío' + event + ' al usuario ' + name + ' con info ' + data1);
+    console.log('[DEBUG GAME NOTIFY] Evento: ' + event + ' | Usuario: ' + name + ' | Info: ', data1, data2, data3, data4);
     var user = this.users[name];
     if (user) {
         user.socket.emit(event, data1, data2, data3, data4);
     } else {
-        console.log('no hay usuario!!' + name);
+        console.log('[DEBUG GAME NOTIFY] no hay usuario!!' + name);
     }
 };
 
@@ -89,22 +120,24 @@ Game.prototype.notifyAll = function (event, data1, data2, data3, data4) {
 
 Game.prototype.endChrono = function () {
     'use strict';
+    //TODO turno finalizado
     console.log('Se ha terminado el crono');
-    this.moveTurn();
+    //this.setTurn();
 };
 
-Game.prototype.moveTurn = function () {
+// TODO debe enviar el turno al jugador que reciba como parámetro, que será el ganador de la última ronda
+Game.prototype.setTurn = function (winner) {
     'use strict';
-    this.chrono.finish();
+    var index = this.players.indexOf(winner);
+    console.log('indexOf debería valer entre 0 y 1, y vale: ' + index);
+    this.turn = this.players[index];
+};
 
-    if (this.turn < this.players.length - 1)
-        ++this.turn;
-    else
-        this.turn = 0;
-
-    // lo envío
+Game.prototype.sendTurn = function () {
+    'use strict';
     var time = 15;
     this.chrono.init(time);
+    // Importante, envío solo el nombre, no el objeto que tiene información sensible
     this.notifyAll('turn', this.players[this.turn].name, time);
 };
 
@@ -124,7 +157,7 @@ Game.prototype.doAction1 = function (name) {
     var user = this.getPlayer(name);
     if (user) {
         console.log(name + ' ha realizado la acción 1, se pasa el turno al siguiente');
-        this.moveTurn();
+        this.setTurn();
     }
 };
 

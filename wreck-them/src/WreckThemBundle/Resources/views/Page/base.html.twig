@@ -40,9 +40,9 @@
 //            }
             // conexión y chat
             {
-                var socket  = io('http://localhost:3000'),
-                    $m      = $('#m'),
-                    $search = $('#search-game');
+                var socket = io('http://localhost:3000'),
+                        $m = $('#m'),
+                        $search = $('#search-game');
 //                    $action1 = $('#action1');
 
                 socket.emit('join', name);
@@ -91,11 +91,11 @@
                 });
 
                 socket.on('turn', function (player, time) {
-                    if (player === name){
+                    if (player === name) {
                         console.log('El turno es mío');
                         $action1.prop('disabled', false);
                     }
-                    else{
+                    else {
                         console.log('El turno es de: ' + player);
                         $action1.prop('disabled', true);
                     }
@@ -103,7 +103,17 @@
                     console.log('Tiempo: ' + time);
                 });
 
-                function newGame(player, oponnent){
+                socket.on('card', function (card) {
+                    console.log('He recibido la carta: ', card);
+                });
+
+                socket.on('oponnent card', function (player) {
+                    if (player === name)
+                        return;
+                    console.log('El jugador ' + player + ' ha recibido una carta');
+                });
+
+                function newGame(player, oponnent) {
 
                 }
             }
