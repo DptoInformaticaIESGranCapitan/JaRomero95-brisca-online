@@ -25,7 +25,7 @@ Chrono.prototype.init = function (time) {
         that.rest = time - timeLapsed;
         if (that.rest < 0) {
             clearInterval(that.interval);
-            that.game.endChrono();
+            that.game.handlerState();
         }
     }, 1000);
 };

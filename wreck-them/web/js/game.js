@@ -41,12 +41,12 @@
     /**
      * Recoge la carta enviada del servidor y la añade al contenedor html del jugador y además le asocia su información mediante jQuery data('index')
      */
-    socket.on('card', function (card, index) {
+    socket.on('card', function (card) {
         var $htmlCard = $('<div class="card"></div>');
-        $htmlCard.data('index', index);
+        $htmlCard.data('id', card.id);
         $myCards.append($htmlCard);
         turnOverCard($htmlCard, card);
-        console.log('He recibido la carta: ', card);
+        console.log('He recibido la carta: ', card.suit, ' ', card.num.name);
     });
 
     /**
@@ -54,8 +54,8 @@
      */
     $myCards.click(".cards", function (ev) {
         var elem    = $(ev.target),
-            index   = elem.data('index');
-        socket.emit('play', index);
+            id   = elem.data('id');
+        socket.emit('play', id);
     });
 
     /**
