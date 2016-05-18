@@ -1,4 +1,3 @@
-var dices = require('./Dices.js')();// instancio este objeto, para todas las partidas
 var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
@@ -248,6 +247,9 @@ Game.prototype.handlerState = function () {
 
             }else{
                 // no ha tirado
+
+                // lanzamiento automático
+                player.playCard();
             }
             break;
     }

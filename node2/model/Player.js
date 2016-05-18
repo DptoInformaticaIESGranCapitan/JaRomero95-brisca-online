@@ -21,13 +21,25 @@ function Player(name) {
 
 Player.prototype.playCard = function (id) {
     'use strict';
+
+    // Si no se envía el id, es porque se le ha agotado el turno, así que se elige una carta al azar de su mano
+    if (!id) {
+        // Índice aleatorio entre las cartas que posee el jugador
+        var randomIndex = Math.floor(Math.random() * this.cards.length);
+
+        // Recojo el íd de la carta seleccionada aleatoriamente
+        id = this.cards[randomIndex].id;
+
+        console.log(this.name + ' no ha tirado, saca carta aleatoria');
+    }
+
     var card = this.getCard(id),
         index;
 
     if (card) {
         index = this.cards.indexOf(card);
         if (index === -1){
-            console.log('[UNRECHEABLE], Player - playCard, la carta no estaba en la baraja');
+            console.log('[UNREACHABLE], Player - playCard, la carta no estaba en la baraja');
             return false;
         }
 
@@ -41,6 +53,7 @@ Player.prototype.playCard = function (id) {
         return card;
     }
 
+    console.log('[UNREACHABLE], Player - playCard, no existe carta');
     return false;
 };
 
