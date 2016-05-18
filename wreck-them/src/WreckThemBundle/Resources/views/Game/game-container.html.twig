@@ -1,7 +1,25 @@
+<style>
+    #game-container div{
+        border: 1px solid black;
+        padding: 3px;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .card {
+        background-color: rgba(255,0,0,0.2);
+        font-weight: normal;
+    }
+</style>
+
 <h3>Juego</h3>
 <div id="game-container">
     <div id="oponnent-cards" class="player-cards">
         Cartas del oponente:
+    </div>
+
+    <div id="oponnent-play">
+        Jugada del oponente:
     </div>
 
     <div id="suit">
@@ -9,7 +27,10 @@
         Muestra: <div id="sample" class="card"></div>
     </div>
 
-    {#Las cartas con listener de click serán las de dentro de este div. El índice que se envía será de 0 a 3, pero debe coincidir con el índice que se encuentra en el servidor, por lo que al enviarse la carta desde el server, se envía el índice que tiene esta en la mano del usuario #}
+    <div id="my-play">
+        Mi jugada:
+    </div>
+
     <div id="my-cards" class="player-cards">
         Mis cartas:
     </div>

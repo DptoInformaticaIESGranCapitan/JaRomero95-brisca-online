@@ -38,7 +38,7 @@ Player.prototype.playCard = function (id) {
         this.cardPlayed = card;
 
         // para notificar el éxito de la operación a la partida
-        return true;
+        return card;
     }
 
     return false;

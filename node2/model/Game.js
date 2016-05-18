@@ -226,7 +226,6 @@ Game.prototype.states = {
  */
 Game.prototype.handlerState = function () {
     'use strict';
-    console.log('Se ha terminado el crono');
     switch (this.state){
         case this.states.wait:
             // En este no se debería encontrar nunca, aquí no hay ninguna espera
@@ -240,6 +239,16 @@ Game.prototype.handlerState = function () {
             break;
         case this.states.playHand:
             //primero, compruebo si el usuario del turno actual, ha jugado la mano que le corresponde
+
+            // recojo el player
+            var player = this.players[this.turn];
+
+            // compruebo si ha tirado
+            if(player.cardPlayed){
+
+            }else{
+                // no ha tirado
+            }
             break;
     }
 
@@ -293,13 +302,16 @@ Game.prototype.play = function (userName, id) {
     if (player) {
         if (player === this.players[this.turn]){
             if (this.state === this.states.playHand) {
-                success = player.playCard(id);
+                card = player.playCard(id);
                 if ( success ) {
                     // Notifico a todos la carta que ha jugado el usuario
-                    this.notifyAll('played', userName, id)
+                    this.notifyAll('played', userName, card);
+
+                    //finalizo el cronómetro
+                    this.chrono.finish();
                 }
             } else {
-                console.log('El jugador ha intentado jugar una carta, pero la partida no está en el estado');
+                console.log('El jugador ha intentado jugar una carta, pero la partida no está en playHand');
             }
         }else{
             console.log('El jugador ha intentado jugar una carta, pero no es su turno');

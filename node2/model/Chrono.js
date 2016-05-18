@@ -33,6 +33,7 @@ Chrono.prototype.init = function (time) {
 Chrono.prototype.finish = function () {
     'use strict';
     clearInterval(this.interval);
+    this.game.handlerState();
 };
 
 module.exports = Chrono;
