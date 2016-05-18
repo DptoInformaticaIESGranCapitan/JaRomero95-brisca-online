@@ -28,101 +28,12 @@
     {#<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>#}
 
     <script>
-        var name = '{{ user.nick }}';
-
-        $(function () {
-//            function initGame(){
-//                $action1.prop('disabled', true);
-//                $action1.click(function(){
-//                    socket.emit('action1');
-//                    $action1.prop('disabled', true);
-//                });
-//            }
-            // conexión y chat
-            {
-                var socket = io('http://localhost:3000'),
-                        $m = $('#m'),
-                        $search = $('#search-game');
-//                    $action1 = $('#action1');
-
-                socket.emit('join', name);
-
-                $('form').submit(function () {
-                    var val = $m.val();
-                    if (val) {
-                        socket.emit('msg', val, name);
-                        $m.val('');
-                    }
-                    return false;
-                });
-
-                socket.on('msg', function (msg) {
-                    $('#messages').append($('<li>').html(
-                            '<strong>' + msg.user + ':</strong> ' + msg.msg
-                    ));
-                });
-
-                socket.on('new user', function (user) {
-                    $('#messages').append($('<li>').html(
-                            '<strong>' + user + ' se ha conectado al chat</strong>'
-                    ));
-                });
-            }
-
-            //búsqueda de partidas
-            {
-                $search.click(function () {
-                    socket.emit('search game');
-                    $search.prop('disabled', true);
-                });
-
-                socket.on('game', function (idGame) {
-                    console.log('Te has unido a la sala: ' + idGame);
-                });
-            }
-
-            //game
-            {
-                socket.on('begin', function (data1, data2) {
-                    $search.prop('disabled', true);
-                    console.log('¡Comienza la partida!', data1, data2);
-//                if(window.location.pathname != '/jugar')
-//                    window.location = '/jugar';
-                });
-
-                socket.on('turn', function (player, time) {
-                    if (player === name) {
-                        console.log('El turno es mío');
-                        $action1.prop('disabled', false);
-                    }
-                    else {
-                        console.log('El turno es de: ' + player);
-                        $action1.prop('disabled', true);
-                    }
-
-                    console.log('Tiempo: ' + time);
-                });
-
-                socket.on('card', function (card) {
-                    console.log('He recibido la carta: ', card);
-                });
-
-                socket.on('oponnent card', function (player) {
-                    if (player === name)
-                        return;
-                    console.log('El jugador ' + player + ' ha recibido una carta');
-                });
-
-                function newGame(player, oponnent) {
-
-                }
-            }
-        });
+        var name    = '{{ user.nick }}',
+            socket  = io('http://localhost:3000');
     </script>
 
-    {#<script src="{{ asset('js/init-socket.js') }}"></script>#}
-    {#<script src="{{ asset('js/c-chat-general.js') }}"></script>#}
-    {#<script src="{{ asset('js/c-search-game.js') }}"></script>#}
+    <script src="{{ asset('js/chat.js') }}"></script>
+    <script src="{{ asset('js/game.js') }}"></script>
 
     {% endif %}
 {% endblock %}

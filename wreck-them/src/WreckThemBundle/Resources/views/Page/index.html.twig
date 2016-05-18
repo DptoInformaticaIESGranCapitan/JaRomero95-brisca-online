@@ -1,12 +1,11 @@
 {% extends 'WreckThemBundle:Page:layout.html.twig' %}
 
 {% block content %}
-    <p>Inicio</p>
 
     {% if user %}
-        <div>
-            <p>botones:</p>
-            <button id="action1">Acción</button>
-        </div>
+        {% include 'WreckThemBundle:Game:game-container.html.twig' %}
+    {% else %}
+        <p>Inicio</p>
     {% endif %}
+
 {% endblock %}

@@ -19,7 +19,7 @@ function Game(io) {
     this.deck = new Deck();
 
     // almacena la muestra
-    this.sample = this.deck.cards.pop();
+    this.sample = undefined;
 }
 
 Game.prototype.addUser = function (player) {
@@ -59,6 +59,9 @@ Game.prototype.sendLateGame = function (name) {
 Game.prototype.distribute = function () {
     'use strict';
     var i, j, player, card;
+    this.sample = this.deck.cards.pop();
+    this.notifyAll('sample', this.sample);
+
     for (i = 0; i < this.players.length; ++i) {
         player = this.players[i];
         // a cada jugador, le reparto y ENVÍO 3 cartas
@@ -66,8 +69,8 @@ Game.prototype.distribute = function () {
             card = this.deck.cards.pop();
             player.cards.push(card);
 
-            // extraer método para notificar las cartas
-            this.notify(player.name, 'card', card);
+            // Nombre, carta, índice de la carta en la mano del jugador
+            this.notify(player.name, 'card', card, player.cards.length - 1);
             this.notifyAll('oponnent card', player.name);
         }
     }
@@ -83,7 +86,7 @@ Game.prototype.sendInitInfo = function () {
 //
 Game.prototype.removeUser = function (user) {
     'use strict';
-    if (!this.start){
+    if (!this.start) {
         delete this.users[user.name];
         --this.numUsers;
         console.log('Se ha eliminado a ' + user.name + ' de la partida ' + this.id);
@@ -101,7 +104,7 @@ Game.prototype.removeUser = function (user) {
  */
 Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
     'use strict';
-    console.log('[DEBUG GAME NOTIFY] Evento: ' + event + ' | Usuario: ' + name + ' | Info: ', data1, data2, data3, data4);
+    //console.log('[DEBUG GAME NOTIFY] Evento: ' + event + ' | Usuario: ' + name + ' | Info: ', data1, data2, data3, data4);
     var user = this.users[name];
     if (user) {
         user.socket.emit(event, data1, data2, data3, data4);
@@ -152,12 +155,16 @@ Game.prototype.getPlayer = function (name) {
     return null;
 };
 
-Game.prototype.doAction1 = function (name) {
+Game.prototype.play = function (userName, indexCard) {
     'use strict';
-    var user = this.getPlayer(name);
-    if (user) {
-        console.log(name + ' ha realizado la acción 1, se pasa el turno al siguiente');
-        this.setTurn();
+    var player = this.getPlayer(userName),
+        card;
+    if (player) {
+        card = player.cards[indexCard];
+        if (card) {
+            var str = card.num.name + ' de ' + card.suit;
+            console.log('El usuario ' + player.name + ' ha intentado jugar la carta ' + str);
+        }
     }
 };
 

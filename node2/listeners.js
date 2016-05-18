@@ -140,14 +140,14 @@ var listeners = function (io) {
         /**
          * Gestiona la action1 de un usuario
          */
-        socket.on('action1', function () {
+        socket.on('play', function (indexCard) {
             var user = global.getUserBySocket(socket),
                 game;
             if (user) {
                 if (user.game) {
                     game = global.games[user.game];
                     if (game) {
-                        game.doAction1(user.name);
+                        game.play(user.name, indexCard);
                     }
                 }
             }
