@@ -19,6 +19,11 @@ function Player(name) {
     this.cardPlayed = undefined;
 
     this.cardsEarned = [];
+
+    /**
+     * @type {number} puntuación total
+     */
+    this.score = 0;
 }
 
 /**
@@ -77,6 +82,17 @@ Player.prototype.getCard = function (id) {
 
     console.log('[UNRECHEABLE], Player - getCard, no se ha encontrado la carta');
     return undefined;
+};
+
+Player.prototype.cardEarned = function (card) {
+    'use strict';
+
+    // Añado la carta, aunque esto es innecesario actualmente
+    this.cardsEarned.push(card);
+
+    // Sumo la puntuación al jugador
+    this.score += card.num.points;
+
 };
 
 module.exports = Player;

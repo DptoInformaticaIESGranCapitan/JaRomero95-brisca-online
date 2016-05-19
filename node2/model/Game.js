@@ -225,7 +225,7 @@ Game.prototype.states = {
     sendInit: 'sendInit',
     playHand: 'playHand',
     checkHand: 'checkHand',
-    checkGame: 'checkGame',
+    sendTurn: 'sendTurn',
     finish: 'finish'
 };
 
@@ -251,7 +251,7 @@ Game.prototype.handlerState = function () {
 
             break;
         case this.states.checkHand:
-            // Llego aquí cuando se ha invocado checkHand() previamente en playHand y pasamos a este estado. Además se ha esperado unos segundos el crono, por lo que directamente podemos enviar el ganador sin sobrecargar.
+            // Llego aquí cuando se ha invocado checkHand() previamente en playHand y pasamos a este estado. Además se ha esperado ya unos segundos el crono, por lo que directamente podemos enviar el ganador sin sobrecargar de info.
 
             // Notifico el ganador de la última mano. Como ya se ha establecido que el siguiente que inicia la próxima mano es el ganador de la anterior, el turno actual apunta al ganador
             this.notifyAll('winnerHand', this.players[this.turn]);
@@ -259,12 +259,26 @@ Game.prototype.handlerState = function () {
             // Cambio el estado de la partida
             this.state = this.states.checkGame;
 
-            // Doy unos segundos de margen para que muestren al ganador
+            // Doy unos segundos de margen para que muestren al ganador de la mano
             this.chrono.init(timeMargin);
 
             break;
+        case this.states.sendTurn:
+            // Llego aquí con los segundos de margen ya añadidos y tras acabar una mano.
+
+            // Primero compruebo si hay suficientes cartas para todos los jugadores. Si no es el caso, la partida habría terminado.
+            if ( this.deck.cards.length < this.players.length ){
+                // La partida ha terminado
+                this.checkWinner();
+            }
+            break;
     }
 
+};
+
+Game.prototype.checkWinner = function() {
+    // Comparo la puntuación de cada jugador
+    // TODO
 };
 
 /**
@@ -375,7 +389,7 @@ Game.prototype.checkHand = function(){
         player = this.players[i];
 
         // se añaden
-        winner.cardsEarned.push(player.cardPlayed);
+        winner.cardsEarned(player.cardPlayed);
 
         // se limpian
         player.cardPlayed = undefined;
@@ -404,9 +418,11 @@ Game.prototype.setTurn = function (winner) {
 Game.prototype.sendTurn = function () {
     'use strict';
     var time = 15;
+
     this.chrono.init(time);
     // Importante, envío solo el nombre, no el objeto, que tiene información sensible
     this.notifyAll('turn', this.players[this.turn].name, time);
+    // FIXME sería muy interesante enviar a los usuarios el momento exacto en el que termina el turno, ya que si se envía una cantidad de segundos, durante el envío podría reducirse el tiempo real, pero ellos no estarían advertidos
 };
 
 /**
