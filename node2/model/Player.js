@@ -14,11 +14,19 @@ function Player(name) {
 
     /**
      * Almacena la última carta jugada
-     * @type {Card}
+     * @type {{}}
      */
     this.cardPlayed = undefined;
+
+    this.cardsEarned = [];
 }
 
+/**
+ * El usuario juega una carta de las que tiene en su mano. Si no se envía el
+ * id de la carta, esta se seleccionará automáticamente entre sus cartas.
+ * @param id {int} identificador de la carta
+ * @returns {boolean|{}} devuelve la carta jugada, o false si falla la operación, cosa que no debería suceder
+ */
 Player.prototype.playCard = function (id) {
     'use strict';
 

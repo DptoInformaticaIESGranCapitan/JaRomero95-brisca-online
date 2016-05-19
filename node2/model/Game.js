@@ -2,7 +2,8 @@ var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
 
-var numPlayers = 2;
+var numPlayers = 2,
+    timeMargin = 5; // margen para recibir notificaciones
 
 function Game(io) {
     'use strict';
@@ -162,8 +163,8 @@ Game.prototype.distribute = function () {
         }
     }
 
-    // Esperamos tres segundos. Luego el manejador se encargará de enviar el primer turno
-    this.chrono.init(3);
+    // Esperamos unos segundos. Luego el manejador se encargará de enviar el primer turno
+    this.chrono.init(timeMargin);
 };
 
 /**
@@ -199,6 +200,14 @@ Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
     }
 };
 
+/**
+ * Notifica un evento a todos los jugadores de la partida
+ * @param event {string} nombre del evento
+ * @param data1
+ * @param data2
+ * @param data3
+ * @param data4
+ */
 Game.prototype.notifyAll = function (event, data1, data2, data3, data4) {
     'use strict';
     for (var i = 0; i < this.players.length; i++) {
@@ -237,31 +246,156 @@ Game.prototype.handlerState = function () {
             this.state = this.states.playHand;
             break;
         case this.states.playHand:
-            //primero, compruebo si el usuario del turno actual, ha jugado la mano que le corresponde
+            // Extraigo método solo para no ensuciar este con muchas líneas
+            this.playHand();
 
-            // recojo el player
-            var player = this.players[this.turn];
+            break;
+        case this.states.checkHand:
+            // Llego aquí cuando se ha invocado checkHand() previamente en playHand y pasamos a este estado. Además se ha esperado unos segundos el crono, por lo que directamente podemos enviar el ganador sin sobrecargar.
 
-            // compruebo si ha tirado
-            if(player.cardPlayed){
+            // Notifico el ganador de la última mano. Como ya se ha establecido que el siguiente que inicia la próxima mano es el ganador de la anterior, el turno actual apunta al ganador
+            this.notifyAll('winnerHand', this.players[this.turn]);
 
-            }else{
-                // no ha tirado
+            // Cambio el estado de la partida
+            this.state = this.states.checkGame;
 
-                // lanzamiento automático
-                player.playCard();
-            }
+            // Doy unos segundos de margen para que muestren al ganador
+            this.chrono.init(timeMargin);
+
             break;
     }
 
 };
 
-// TODO debe enviar el turno al jugador que reciba como parámetro, que será el ganador de la última ronda
+/**
+ * Gestiona el estado de jugar una mano de la partida. Va dentro de handlerState,
+ * pero se ha extraído para limpiar el código
+ */
+Game.prototype.playHand = function() {
+    //primero, compruebo si el usuario del turno actual, ha jugado la mano que le corresponde
+
+    // recojo el player
+    var player = this.players[this.turn],
+        card;
+
+    // compruebo si ha tirado
+    if(!player.cardPlayed){
+        // no ha tirado
+
+        // lanzamiento automático
+        player.playCard();
+
+        card = player.playCard(id);
+        if ( card ) {
+            // Notifico a todos la carta que ha jugado el usuario
+            this.notifyAll('played', player.name, card);
+        }else {
+            console.log('No ha jugado carta, no debería suceder');
+        }
+    }
+
+    // Una vez que ha jugado este jugador, cambio el turno al siguiente
+    this.nextTurn();
+
+    // Compruebo si el turno ha vuelto al jugador que ha iniciado la mano
+    if(this.turn === this.firstTurn){
+        // establezco el estado de la partida a: comprobando mano
+        this.state = this.states.checkHand;
+
+        this.checkHand();
+
+        // Espero unos segundos, para dar tiempo a los jugadores a recibir las cartas que se han jugado
+        this.chrono.init(timeMargin);
+    }else{
+        // La mano aún no ha terminado, notifico el próximo turno
+        this.sendTurn();
+    }
+};
+
+/**
+ * Cambio el turno al siguiente jugador en el array
+ */
+Game.prototype.nextTurn = function(){
+    'use strict';
+    if(this.turn < this.players.length-1)
+        ++this.turn;
+    else
+        this.turn = 0;
+};
+
+/**
+ * Comprueba el ganador de una mano cuando esta ha finalizado
+ */
+Game.prototype.checkHand = function(){
+    'use strict';
+    var samples = [], i, player, winner;
+
+    // Compruebo si hay jugadores que han jugado cartas del palo de muestra
+    for (i = 0; i < this.players.length; i++) {
+        player = this.players[i];
+        if(player.cardPlayed.suit === this.sample.suit){
+            samples.push(player);
+        }
+    }
+
+    // Si hay muestras, compruebo quien tiene la más alta
+    if (samples) {
+        // La primera muestra es la ganadora actual
+        winner = samples[0];
+
+        // Se empieza a recorrer a partir del segundo jugador (preparado para más de 2)
+        for (i = 1; i < samples.length; i++) {
+            player = samples[i];
+            if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
+                winner = player;
+            }
+        }
+    }else{
+        // No se han jugado cartas de muestra, así que aún no hay ganador
+
+        // La primera carta jugada es la ganadora actual
+        winner = this.players[this.firstTurn];
+
+        // Se recorren todos los jugadores, no importa recorrer también al que ya es ganador inicialmente
+        for (i = 0; i < this.players.length; i++) {
+            player = this.players[i];
+            // Se comprueba que la carta sea del palo que se está jugando
+            if (player.cardPlayed.suit === winner.cardPlayed.suit){
+
+                // Se compara la puntuación de ambas cartas
+                if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
+                    winner = player;
+                }
+            }
+        }
+    }
+
+    // Se añaden las cartas ganadas al jugador, y se limpian las cartas jugadas
+    for (i = 0; i < this.players.length; i++) {
+        player = this.players[i];
+
+        // se añaden
+        winner.cardsEarned.push(player.cardPlayed);
+
+        // se limpian
+        player.cardPlayed = undefined;
+    }
+
+    // finalmente se establece el turno al jugador que ha ganado
+    this.setTurn(winner);
+};
+
+/**
+ * Establece el turno al jugador enviado, que debe ser el ganador de
+ * la última mano
+ * @param winner {Player} ganador de la última mano
+ */
 Game.prototype.setTurn = function (winner) {
     'use strict';
     var index = this.players.indexOf(winner);
-    console.log('indexOf debería valer entre 0 y 1, y vale: ' + index);
     this.turn = this.players[index];
+
+    console.log('El jugador que ha ganado la mano es: ' + winner.name + ', por lo tanto el turno se establce a ' + this.players[this.turn].name);
 };
 
 /**
@@ -299,18 +433,19 @@ Game.prototype.getPlayer = function (name) {
 Game.prototype.play = function (userName, id) {
     'use strict';
     var player = this.getPlayer(userName),
-        card,
-        success;
+        card;
     if (player) {
         if (player === this.players[this.turn]){
             if (this.state === this.states.playHand) {
                 card = player.playCard(id);
-                if ( success ) {
+                if ( card ) {
                     // Notifico a todos la carta que ha jugado el usuario
                     this.notifyAll('played', userName, card);
 
                     //finalizo el cronómetro
                     this.chrono.finish();
+                }else{
+                    console.log('No ha tenido éxito jugar una carta');
                 }
             } else {
                 console.log('El jugador ha intentado jugar una carta, pero la partida no está en playHand');
@@ -318,6 +453,8 @@ Game.prototype.play = function (userName, id) {
         }else{
             console.log('El jugador ha intentado jugar una carta, pero no es su turno');
         }
+    } else {
+        console.log('Un jugador ha intentado jugar, pero no está en la partida');
     }
 };
 
