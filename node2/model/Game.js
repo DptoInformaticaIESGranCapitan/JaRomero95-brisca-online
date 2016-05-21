@@ -3,8 +3,9 @@ var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
 
 var numPlayers = 2,
-    timeMargin = 5; // margen para recibir notificaciones
+    timeMargin = 3; // margen para recibir notificaciones
 
+// TODO si el usuario está desconectado de la partida, tirar automáticamente!
 function Game(io) {
     'use strict';
 
@@ -80,6 +81,12 @@ function Game(io) {
      * @type {undefined}
      */
     this.sample = undefined;
+
+    /**
+     * Establece a los ganadores al acabar la partida
+     * @type {[]}
+     */
+    this.winners = undefined;
 }
 
 /**
@@ -87,6 +94,7 @@ function Game(io) {
  * @param user Usuario que desea añadirse
  */
 Game.prototype.addUser = function (user) {
+    // FIXME no añadir dos veces al mismo jugador
     'use strict';
     if (this.numUsers < numPlayers) {
         this.users[user.name] = user;
@@ -163,7 +171,6 @@ Game.prototype.distribute = function () {
         }
     }
 
-    // Esperamos unos segundos. Luego el manejador se encargará de enviar el primer turno
     this.chrono.init(timeMargin);
 };
 
@@ -239,46 +246,104 @@ Game.prototype.handlerState = function () {
             // En este no se debería encontrar nunca, aquí no hay ninguna espera
             break;
         case this.states.sendInit:
+            // se cambia a este estado dentro de checkusers, y después de enviar la info, en distribute se espera por primera vez
+
             // envío el primer turno
             this.sendTurn();
 
             // establezco el estado a: jugando la mano
             this.state = this.states.playHand;
+
+            // Espero el margen antes de entrar en jugando mano
+            this.chrono.init(timeMargin);
             break;
         case this.states.playHand:
             // Extraigo método solo para no ensuciar este con muchas líneas
             this.playHand();
 
+            // Compruebo si el turno ha vuelto al jugador que ha iniciado la mano
+            if(this.turn === this.firstTurn){
+                // establezco el estado de la partida a: comprobando mano
+                this.state = this.states.checkHand;
+
+                // Espero el margen antes de entrar en comprobar mano
+                this.chrono.init(timeMargin);
+            }else{
+                // La mano aún no ha terminado, notifico el próximo turno
+                this.sendTurn();
+            }
+
             break;
         case this.states.checkHand:
-            // Llego aquí cuando se ha invocado checkHand() previamente en playHand y pasamos a este estado. Además se ha esperado ya unos segundos el crono, por lo que directamente podemos enviar el ganador sin sobrecargar de info.
+
+            // Se ha esperado ya unos segundos el crono, por lo que directamente podemos enviar el ganador sin sobrecargar de info.
+            this.checkHand();
 
             // Notifico el ganador de la última mano. Como ya se ha establecido que el siguiente que inicia la próxima mano es el ganador de la anterior, el turno actual apunta al ganador
-            this.notifyAll('winnerHand', this.players[this.turn]);
+            this.notifyAll('winnerHand', this.players[this.turn].name);
 
             // Cambio el estado de la partida
-            this.state = this.states.checkGame;
+            this.state = this.states.sendTurn;
 
-            // Doy unos segundos de margen para que muestren al ganador de la mano
+            // Espero el margen antes de entrar en enviar turno
             this.chrono.init(timeMargin);
-
             break;
         case this.states.sendTurn:
-            // Llego aquí con los segundos de margen ya añadidos y tras acabar una mano.
 
             // Primero compruebo si hay suficientes cartas para todos los jugadores. Si no es el caso, la partida habría terminado.
             if ( this.deck.cards.length < this.players.length ){
                 // La partida ha terminado
                 this.checkWinner();
+
+                // Establezco el estado de la partida a finalizado
+                this.state = this.states.finish;
+
+                // Espero el margen antes de entrar en finish
+                this.chrono.init(timeMargin);
+            } else {
+                this.sendTurn();
             }
+            break;
+        case this.states.finish:
+            // Solo queda anunciar al ganador o ganadore, pero solo se debe enviar el nombre
+            var i, winner, winnerNames = [];
+            for (i = 0; i < this.winners.length; i++ ) {
+                winner = this.winners[i];
+                winnerNames.push(winner.name);
+            }
+
+            this.notifyAll('winners', winnerNames);
+
             break;
     }
 
 };
 
+/**
+ * Establece el ganador (o ganadores, en caso de empate) de la partida
+ */
 Game.prototype.checkWinner = function() {
     // Comparo la puntuación de cada jugador
-    // TODO
+
+    // Ganadores ( array porque puede ser empate, varios ganadores )
+    var player,
+        i,
+        winners = [this.players[0]];
+
+    for (i = 0; i < this.players.length; i++) {
+        player = this.players[i];
+        if(player.score > winners[0].score){
+            // reasigno porque debo eliminar a todos los jugadores que estuvieran empatados para añadir al campeón
+            winners = [player];
+        }else if (player.score === winners[0].score) {
+            // lo añado al array de vencedores porque van empate
+            winners.push(player);
+        }
+
+        // Tiene menos puntuación así que no hago nada
+    }
+
+    this.winners = winners;
 };
 
 /**
@@ -297,9 +362,8 @@ Game.prototype.playHand = function() {
         // no ha tirado
 
         // lanzamiento automático
-        player.playCard();
+        card = player.playCard();
 
-        card = player.playCard(id);
         if ( card ) {
             // Notifico a todos la carta que ha jugado el usuario
             this.notifyAll('played', player.name, card);
@@ -310,20 +374,6 @@ Game.prototype.playHand = function() {
 
     // Una vez que ha jugado este jugador, cambio el turno al siguiente
     this.nextTurn();
-
-    // Compruebo si el turno ha vuelto al jugador que ha iniciado la mano
-    if(this.turn === this.firstTurn){
-        // establezco el estado de la partida a: comprobando mano
-        this.state = this.states.checkHand;
-
-        this.checkHand();
-
-        // Espero unos segundos, para dar tiempo a los jugadores a recibir las cartas que se han jugado
-        this.chrono.init(timeMargin);
-    }else{
-        // La mano aún no ha terminado, notifico el próximo turno
-        this.sendTurn();
-    }
 };
 
 /**
@@ -349,6 +399,7 @@ Game.prototype.checkHand = function(){
         player = this.players[i];
         if(player.cardPlayed.suit === this.sample.suit){
             samples.push(player);
+            console.log(player.name + ' ha jugado muestra: ' + player.cardPlayed);
         }
     }
 
@@ -370,6 +421,8 @@ Game.prototype.checkHand = function(){
         // La primera carta jugada es la ganadora actual
         winner = this.players[this.firstTurn];
 
+        console.log('El ganador de la mano momentáneo es: ' + winner.name);
+
         // Se recorren todos los jugadores, no importa recorrer también al que ya es ganador inicialmente
         for (i = 0; i < this.players.length; i++) {
             player = this.players[i];
@@ -389,7 +442,7 @@ Game.prototype.checkHand = function(){
         player = this.players[i];
 
         // se añaden
-        winner.cardsEarned(player.cardPlayed);
+        winner.cardEarned(player.cardPlayed);
 
         // se limpian
         player.cardPlayed = undefined;
@@ -407,7 +460,8 @@ Game.prototype.checkHand = function(){
 Game.prototype.setTurn = function (winner) {
     'use strict';
     var index = this.players.indexOf(winner);
-    this.turn = this.players[index];
+    this.turn = index;
+    this.firstTurn = index;
 
     console.log('El jugador que ha ganado la mano es: ' + winner.name + ', por lo tanto el turno se establce a ' + this.players[this.turn].name);
 };

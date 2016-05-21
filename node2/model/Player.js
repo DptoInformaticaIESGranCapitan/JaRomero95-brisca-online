@@ -34,11 +34,15 @@ function Player(name) {
  */
 Player.prototype.playCard = function (id) {
     'use strict';
+    var card,
+        index,
+        randomIndex;
+
 
     // Si no se envía el id, es porque se le ha agotado el turno, así que se elige una carta al azar de su mano
-    if (!id) {
+    if (id === undefined) {
         // Índice aleatorio entre las cartas que posee el jugador
-        var randomIndex = Math.floor(Math.random() * this.cards.length);
+        randomIndex = Math.floor(Math.random() * this.cards.length);
 
         // Recojo el íd de la carta seleccionada aleatoriamente
         id = this.cards[randomIndex].id;
@@ -46,8 +50,7 @@ Player.prototype.playCard = function (id) {
         console.log(this.name + ' no ha tirado, saca carta aleatoria');
     }
 
-    var card = this.getCard(id),
-        index;
+    card = this.getCard(id);
 
     if (card) {
         index = this.cards.indexOf(card);

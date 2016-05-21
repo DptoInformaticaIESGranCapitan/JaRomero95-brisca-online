@@ -2,6 +2,7 @@
     'use strict';
     var $search = $('#search-game'),
         $myCards = $("#my-cards"),
+        $oponnentCards = $("#oponnent-cards"),
         $sample = $('#sample'),
         $myPlay = $('#my-play'),
         $oponnentPlay = $('#oponnent-play');
@@ -17,18 +18,18 @@
     }
 
     /**
-     * Recoje el elemento del DOM que corresponde a la carta que tiene el id enviado a buscar
+     * Recoje el elemento del DOM que corresponde a la carta
+     * que tiene el id enviado a buscar
      * @param id identificador de la carta
      * @returns {$element|undefined}
      */
     function getElementCard(id) {
-        'use strict';
         var i, $elem, idCard, values,
             $cards = $('#my-cards .card');
 
         // recorro los divs, es decir, las cartas del propio jugador
         for (i = 0; i < $cards.length; i++) {
-            $elem = $cards[i];
+            $elem = $cards.eq(i);
 
             // recojo la información de la carta asociada al div
             values = $elem.data('card');
@@ -46,18 +47,24 @@
         return undefined;
     }
 
-    /** Buscar una partida */
+    /**
+     * Buscar una partida
+     * */
     $search.click(function () {
         socket.emit('search game');
         $search.prop('disabled', true);
     });
 
-    /** Notifica que se ha unido a una partida */
+    /**
+     * Notifica que se ha unido a una partida
+     * */
     socket.on('game', function (idGame) {
         console.log('Te has unido a la sala: ' + idGame);
     });
 
-    /** Notifica que ha empezado la partida */
+    /**
+     *  Notifica que ha empezado la partida
+     *  */
     socket.on('begin', function (data1, data2) {
         $search.prop('disabled', true);
         console.log('¡Comienza la partida!', data1, data2);
@@ -65,22 +72,24 @@
 //                    window.location = '/jugar';
     });
 
-    /** Notifica que se ha emitido un turno de jugador */
+    /**
+     * Notifica que se ha emitido un turno de jugador
+     * */
     socket.on('turn', function (player, time) {
         if (player === name) {
             console.log('El turno es mío');
-            $action1.prop('disabled', false);
         }
         else {
             console.log('El turno es de: ' + player);
-            $action1.prop('disabled', true);
         }
 
         console.log('Tiempo: ' + time);
     });
 
     /**
-     * Recoge la carta enviada del servidor y la añade al contenedor html del jugador y además le asocia su información mediante jQuery data('card')
+     * Recoge la carta enviada del servidor y la añade al contenedor
+     * html del jugador y además le asocia su información mediante
+     * jQuery data('card')
      */
     socket.on('card', function (card) {
         // creo el elemento html
@@ -103,8 +112,8 @@
      */
     $myCards.click(".cards", function (ev) {
         var elem    = $(ev.target),
-            id   = elem.data('id');
-        socket.emit('play', id);
+            card   = elem.data('card');
+        socket.emit('play', card.id);
     });
 
     /**
@@ -121,6 +130,13 @@
     socket.on('oponnent card', function (player) {
         if (player === name)
             return;
+
+        // creo el elemento html
+        var $htmlCard = $('<div class="card">Carta del oponente</div>');
+
+        // añado la carta a la caja contenedora de la GUI
+        $oponnentCards.append($htmlCard);
+
         console.log('El jugador ' + player + ' ha recibido una carta');
     });
 
@@ -149,11 +165,27 @@
     /**
      * Notifica que un jugador ha jugado una carta
      */
-    socket.on('played', function (player, card) {
-        if (player === name){
+    socket.on('played', function (playerName, card) {
+        console.log(playerName + ' ha jugado ' , card);
+        if (playerName === name){
             onPlayCard(card);
         }else{
             onOponnentPlayCard(card);
         }
     });
+
+    socket.on('winnerHand', function (playerName) {
+        console.log(playerName + ' ha ganado la mano');
+    });
+
+    socket.on('winners', function (winnersNames) {
+        if(winnersNames.length == 1)
+            console.log(winnersNames[0] + ' ha ganado la partida');
+        else if (winnersNames.length > 0) {
+            console.log('Han ganado la partida: ' + winnersNames.join(', '));
+        } else
+            console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
+
+    });
+
 })(window, undefined, $, socket, name);
