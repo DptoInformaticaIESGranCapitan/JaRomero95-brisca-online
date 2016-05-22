@@ -3,7 +3,8 @@ var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
 
 var numPlayers = 2,
-    timeMargin = 3; // margen para recibir notificaciones
+    timeMargin = 1,
+    timeTurn = 2; // margen para recibir notificaciones
 
 // TODO si el usuario está desconectado de la partida, tirar automáticamente!
 function Game(io) {
@@ -154,8 +155,8 @@ Game.prototype.distribute = function () {
     'use strict';
     var i, j, player, card;
 
-    // La muestra es la última carta, pero no se saca de la baraja porque al final de la partida también se repartirá esta carta
-    this.sample = this.deck.cards[this.deck.cards.length - 1];
+    // La muestra es la primera carta, pero no se saca de la baraja porque al final de la partida también se repartirá esta carta
+    this.sample = this.deck.cards[0];
     this.notifyAll('sample', this.sample);
 
     for (i = 0; i < this.players.length; ++i) {
@@ -172,6 +173,32 @@ Game.prototype.distribute = function () {
     }
 
     this.chrono.init(timeMargin);
+};
+
+/**
+ * Al comenzar la partida, envía las tres primeras cartas a cada jugador y la brisca
+ */
+Game.prototype.distributeHand = function () {
+    'use strict';
+    if (this.hasCards()) {
+        var i, player, card;
+
+        for (i = 0; i < this.players.length; ++i) {
+            player = this.players[i];
+            // a cada jugador, le reparto y ENVÍO 1 carta
+            card = this.deck.cards.pop();
+            player.cards.push(card);
+
+            // Nombre, carta
+            this.notify(player.name, 'card', card);
+            this.notifyAll('oponnent card', player.name);
+        }
+
+        this.chrono.init(timeMargin);
+    } else {
+        // si no reparto cartas, espero menos tiempo para pasar a la siguiente acción
+        this.chrono.init(1);
+    }
 };
 
 /**
@@ -232,6 +259,7 @@ Game.prototype.states = {
     sendInit: 'sendInit',
     playHand: 'playHand',
     checkHand: 'checkHand',
+    distribute: 'distribute',
     sendTurn: 'sendTurn',
     finish: 'finish'
 };
@@ -254,8 +282,7 @@ Game.prototype.handlerState = function () {
             // establezco el estado a: jugando la mano
             this.state = this.states.playHand;
 
-            // Espero el margen antes de entrar en jugando mano
-            this.chrono.init(timeMargin);
+            // No espero margen, porque ya se espera el tiempo del turno, y al acabar el turno se pasa a playHand
             break;
         case this.states.playHand:
             // Extraigo método solo para no ensuciar este con muchas líneas
@@ -281,6 +308,7 @@ Game.prototype.handlerState = function () {
 
             // Notifico el ganador de la última mano. Como ya se ha establecido que el siguiente que inicia la próxima mano es el ganador de la anterior, el turno actual apunta al ganador
             this.notifyAll('winnerHand', this.players[this.turn].name);
+            this.notifyAll('scores', this.players);
 
             // Cambio el estado de la partida
             this.state = this.states.sendTurn;
@@ -291,7 +319,7 @@ Game.prototype.handlerState = function () {
         case this.states.sendTurn:
 
             // Primero compruebo si hay suficientes cartas para todos los jugadores. Si no es el caso, la partida habría terminado.
-            if ( this.deck.cards.length < this.players.length ){
+            if ( this.isEnd() ){
                 // La partida ha terminado
                 this.checkWinner();
 
@@ -301,11 +329,16 @@ Game.prototype.handlerState = function () {
                 // Espero el margen antes de entrar en finish
                 this.chrono.init(timeMargin);
             } else {
-                this.sendTurn();
+                this.distributeHand();
+                this.state = this.states.distribute;
             }
             break;
+        case this.states.distribute:
+            this.sendTurn();
+            this.state = this.states.playHand;
+            break;
         case this.states.finish:
-            // Solo queda anunciar al ganador o ganadore, pero solo se debe enviar el nombre
+            // Solo queda anunciar al ganador o ganadores, pero solo se debe enviar el nombre
             var i, winner, winnerNames = [];
             for (i = 0; i < this.winners.length; i++ ) {
                 winner = this.winners[i];
@@ -399,20 +432,22 @@ Game.prototype.checkHand = function(){
         player = this.players[i];
         if(player.cardPlayed.suit === this.sample.suit){
             samples.push(player);
-            console.log(player.name + ' ha jugado muestra: ' + player.cardPlayed);
+            //console.log(player.name + ' ha jugado muestra: ' + player.cardPlayed);
         }
     }
 
     // Si hay muestras, compruebo quien tiene la más alta
-    if (samples) {
+    if (samples.length > 0) {
         // La primera muestra es la ganadora actual
         winner = samples[0];
+        //console.log('Hay muestras, el ganador va siendo: ', winner.name);
 
         // Se empieza a recorrer a partir del segundo jugador (preparado para más de 2)
         for (i = 1; i < samples.length; i++) {
             player = samples[i];
             if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
                 winner = player;
+                //console.log('Hay muestra mayor, el ganador va siendo: ', winner.name);
             }
         }
     }else{
@@ -421,7 +456,7 @@ Game.prototype.checkHand = function(){
         // La primera carta jugada es la ganadora actual
         winner = this.players[this.firstTurn];
 
-        console.log('El ganador de la mano momentáneo es: ' + winner.name);
+        //console.log('El ganador de la mano momentáneo es: ' + winner.name);
 
         // Se recorren todos los jugadores, no importa recorrer también al que ya es ganador inicialmente
         for (i = 0; i < this.players.length; i++) {
@@ -432,6 +467,7 @@ Game.prototype.checkHand = function(){
                 // Se compara la puntuación de ambas cartas
                 if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
                     winner = player;
+                    //console.log('Hay mejor carta, el ganador va siendo: ', winner.name);
                 }
             }
         }
@@ -471,12 +507,12 @@ Game.prototype.setTurn = function (winner) {
  */
 Game.prototype.sendTurn = function () {
     'use strict';
-    var time = 15;
+    var finishTime;
 
-    this.chrono.init(time);
+    this.chrono.init(timeTurn);
     // Importante, envío solo el nombre, no el objeto, que tiene información sensible
-    this.notifyAll('turn', this.players[this.turn].name, time);
-    // FIXME sería muy interesante enviar a los usuarios el momento exacto en el que termina el turno, ya que si se envía una cantidad de segundos, durante el envío podría reducirse el tiempo real, pero ellos no estarían advertidos
+    finishTime = this.chrono.initTime + (timeTurn * 1000);
+    this.notifyAll('turn', this.players[this.turn].name, finishTime);
 };
 
 /**
@@ -508,12 +544,15 @@ Game.prototype.play = function (userName, id) {
         if (player === this.players[this.turn]){
             if (this.state === this.states.playHand) {
                 card = player.playCard(id);
+                console.log(userName, ' intenta jugar id: ', id);
                 if ( card ) {
                     // Notifico a todos la carta que ha jugado el usuario
                     this.notifyAll('played', userName, card);
 
                     //finalizo el cronómetro
                     this.chrono.finish();
+
+                    console.log(userName, ' juega ', card.suit, card.num.name);
                 }else{
                     console.log('No ha tenido éxito jugar una carta');
                 }
@@ -526,6 +565,47 @@ Game.prototype.play = function (userName, id) {
     } else {
         console.log('Un jugador ha intentado jugar, pero no está en la partida');
     }
+};
+
+/**
+ * Comprueba que haya terminado la partida. Esto significa que no quedan
+ * cartas en la baraja para poder repartir a todos y que además, ninguno
+ * de los jugadores mantiene cartas en sus manos.
+ * @returns {boolean}
+ */
+Game.prototype.isEnd = function() {
+    var player,
+        i,
+        emptyHands = true; // todos los jugadores sin cartas
+
+    // Compruebo si ya no quedan cartas para repartir
+    if(this.hasCards()){
+
+        // recorro los jugadores
+        for (i = 0; i < this.players.length; i++) {
+            player = this.players[i];
+
+            // compruebo si al jugador le quedan cartas
+            if(player.cards.length > 0){
+                // como le quedan cartas a uno, aún sigue la partida
+                emptyHands = false;
+            }
+        }
+
+        // si no le quedasen cartas a ninguno, la partida se habría acabado
+        if(emptyHands)
+            return true;
+    }
+
+    return false;
+};
+
+/**
+ * Comprueba si hay suficientes cartas para repartir una mano a los jugadores
+ * @returns {boolean}
+ */
+Game.prototype.hasCards = function(){
+    return this.deck.cards.length >= this.players.length;
 };
 
 module.exports = Game;

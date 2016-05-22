@@ -5,16 +5,58 @@
         $oponnentCards = $("#oponnent-cards"),
         $sample = $('#sample'),
         $myPlay = $('#my-play'),
-        $oponnentPlay = $('#oponnent-play');
+        $oponnentPlay = $('#oponnent-play'),
+        chronoInterval,
+        chronoFinish,
+        $chrono = $('#chrono'),
+        $scores = $('#scores'),
+        $turn = $('#turn'),
+        $num = $('#num'),
+        restCards = 40;
+
+    function initChrono(finishTime) {
+        chronoFinish = finishTime;
+
+        // Si ya había un cronómetro activo, se limpia
+        if (chronoInterval) {
+            clearInterval(chronoInterval);
+        }
+
+        chronoInterval = setInterval(function () {
+            var actual = new Date().getTime(),
+                timeRest = (finishTime - actual) / 1000;
+            $chrono.text(timeRest.toFixed(2));
+
+            if (actual > chronoFinish) {
+                finishChrono();
+            }
+        }, 1000);
+    }
+
+    function finishChrono() {
+        clearInterval(chronoInterval);
+        $chrono.text('No hay crono');
+    }
+
+    function updateNum() {
+        if (restCards <= 0) return;
+
+        $num.text(--restCards);
+
+        if(restCards < 1){
+            $sample.addClass('semi-transparent');
+            $num.css('background-image', 'none');
+        }
+    }
 
     /**
      * Muestra una carta que estaba bocabajo
      * @param $elem elemento del DOM que contiene la carta
      * @param card información de la carta para establecerla en el elemento
      */
-    function turnOverCard($elem, card){
-        var str  = card.num.name + ' de ' + card.suit
-        $elem.html(str);
+    function turnOverCard($elem, card) {
+        var classStr = card.suit + card.num.name;
+        $elem.addClass(classStr);
     }
 
     /**
@@ -75,15 +117,15 @@
     /**
      * Notifica que se ha emitido un turno de jugador
      * */
-    socket.on('turn', function (player, time) {
-        if (player === name) {
-            console.log('El turno es mío');
+    socket.on('turn', function (playerName, time) {
+        finishChrono();
+        if (playerName === name) {
+            $turn.text('Me toca');
         }
         else {
-            console.log('El turno es de: ' + player);
+            $turn.text('Le toca a ' + playerName);
         }
-
-        console.log('Tiempo: ' + time);
+        initChrono(time);
     });
 
     /**
@@ -104,6 +146,7 @@
         // Pongo la carta bocarriba
         turnOverCard($htmlCard, card);
 
+        updateNum();
         console.log('He recibido la carta: ', card.suit, ' ', card.num.name);
     });
 
@@ -113,6 +156,7 @@
     $myCards.click(".cards", function (ev) {
         var elem    = $(ev.target),
             card   = elem.data('card');
+        console.log('Ha intentado jugar: '+card.id);
         socket.emit('play', card.id);
     });
 
@@ -132,10 +176,12 @@
             return;
 
         // creo el elemento html
-        var $htmlCard = $('<div class="card">Carta del oponente</div>');
+        var $htmlCard = $('<div class="card"></div>');
 
         // añado la carta a la caja contenedora de la GUI
         $oponnentCards.append($htmlCard);
+
+        updateNum();
 
         console.log('El jugador ' + player + ' ha recibido una carta');
     });
@@ -148,18 +194,20 @@
         $elem.remove();
 
         // lo añado a carta jugada
-        $myPlay.append($elem);
+        $myPlay.html($elem);
     }
 
     function onOponnentPlayCard(card){
         // recojo cualquier carta bocaabajo de su contenedor
-        var $elem = $('#oponnent-cards .card')[0];
+        var $elem = $('#oponnent-cards .card').eq(0);
 
         // lo elimino de ese contenedor
         $elem.remove();
 
         // lo añado a carta jugada del oponente
-        $oponnentPlay.append($elem);
+        $oponnentPlay.html($elem);
+
+        turnOverCard($elem, card);
     }
 
     /**
@@ -172,10 +220,14 @@
         }else{
             onOponnentPlayCard(card);
         }
+        finishChrono();
     });
 
     socket.on('winnerHand', function (playerName) {
-        console.log(playerName + ' ha ganado la mano');
+        $scores.append('<p><strong>' + playerName + ' ha ganado la mano</strong></p>');
+        finishChrono();
+        $myPlay.html('');
+        $oponnentPlay.html('');
     });
 
     socket.on('winners', function (winnersNames) {
@@ -186,6 +238,12 @@
         } else
             console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
 
+    });
+
+    socket.on('scores', function (players) {
+        $scores.append('<p>' + players[0].name + ': ' + players[0].score + '</p>');
+        $scores.append('<p>' + players[1].name + ': ' + players[1].score + '</p>');
+        $scores.append('<p>--------------</p>');
     });
 
 })(window, undefined, $, socket, name);

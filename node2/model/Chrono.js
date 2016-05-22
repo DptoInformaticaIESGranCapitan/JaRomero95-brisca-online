@@ -2,6 +2,7 @@ function Chrono(game) {
     'use strict';
     this.game = game;
     this.rest = 0;
+    this.initTime = 0;
 }
 
 /**
@@ -10,8 +11,9 @@ function Chrono(game) {
  */
 Chrono.prototype.init = function (time) {
     'use strict';
-    var that = this,
-        init = new Date().getTime();
+    var that = this;
+
+    this.initTime = new Date().getTime();
 
     // Si ya había un cronómetro activo, se limpia
     if (this.interval) {
@@ -20,7 +22,7 @@ Chrono.prototype.init = function (time) {
 
     this.interval = setInterval(function () {
         var actual = new Date().getTime(),
-            timeLapsed = (actual - init) / 1000;
+            timeLapsed = (actual - that.initTime) / 1000;
 
         that.rest = time - timeLapsed;
         if (that.rest < 0) {

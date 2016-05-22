@@ -60,7 +60,7 @@ Player.prototype.playCard = function (id) {
         }
 
         //elimino de la mano la carta jugada
-        this.cards = this.cards.splice(index, 1);
+        this.cards.splice(index, 1);
 
         // la añado como última carta jugada
         this.cardPlayed = card;
@@ -69,7 +69,6 @@ Player.prototype.playCard = function (id) {
         return card;
     }
 
-    console.log('[UNREACHABLE], Player - playCard, no existe carta');
     return false;
 };
 
@@ -84,6 +83,8 @@ Player.prototype.getCard = function (id) {
     }
 
     console.log('[UNRECHEABLE], Player - getCard, no se ha encontrado la carta');
+    console.log('La carte era id: ' + id + ' y el usuario tiene: ');
+    console.log(this.cards);
     return undefined;
 };
 
