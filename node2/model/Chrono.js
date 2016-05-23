@@ -3,6 +3,7 @@ function Chrono(game) {
     this.game = game;
     this.rest = 0;
     this.initTime = 0;
+    this.finishTime = 0;
 }
 
 /**
@@ -14,6 +15,7 @@ Chrono.prototype.init = function (time) {
     var that = this;
 
     this.initTime = new Date().getTime();
+    this.finishTime = this.initTime + (time * 1000);
 
     // Si ya había un cronómetro activo, se limpia
     if (this.interval) {

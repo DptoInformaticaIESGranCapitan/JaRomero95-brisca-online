@@ -17,6 +17,8 @@
     function initChrono(finishTime) {
         chronoFinish = finishTime;
 
+        console.log(new Date(finishTime));
+
         // Si ya había un cronómetro activo, se limpia
         if (chronoInterval) {
             clearInterval(chronoInterval);
@@ -24,13 +26,13 @@
 
         chronoInterval = setInterval(function () {
             var actual = new Date().getTime(),
-                timeRest = (finishTime - actual) / 1000;
-            $chrono.text(timeRest.toFixed(2));
+                timeRest = (chronoFinish - actual) / 1000;
+            $chrono.text(timeRest.toFixed(0));
 
             if (actual > chronoFinish) {
                 finishChrono();
             }
-        }, 1000);
+        }, 250);
     }
 
     function finishChrono() {
@@ -160,12 +162,23 @@
         socket.emit('play', card.id);
     });
 
+    $sample.click(function () {
+        var elem    = $(this),
+            card   = elem.data('card');
+        socket.emit('change sample', card.id);
+    });
+
     /**
      * Recibe la muestra de la partida
      */
     socket.on('sample', function (card) {
+        $sample.data('card', card);
         turnOverCard($sample, card);
         console.log('La muestra es: ', card);
+    });
+
+    socket.on('numCards', function (numCards) {
+        restCards = numCards;
     });
 
     /**
@@ -197,6 +210,18 @@
         $myPlay.html($elem);
     }
 
+    function onPlayCardLate(card){
+        var $elem = $('<div class="card"></div>');
+        $myPlay.html($elem);
+        turnOverCard($elem, card);
+    }
+
+    function onOponnentPlayCardLate(card){
+        var $elem = $('<div class="card"></div>');
+        $oponnentPlay.html($elem);
+        turnOverCard($elem, card);
+    }
+
     function onOponnentPlayCard(card){
         // recojo cualquier carta bocaabajo de su contenedor
         var $elem = $('#oponnent-cards .card').eq(0);
@@ -223,6 +248,42 @@
         finishChrono();
     });
 
+    socket.on('change sample', function (playerName, oldSample, sample) {
+        // si yo la he cambiado
+        if(playerName === name){
+            // recojo la nueva muestra
+            var $elem = getElementCard(sample.id);
+
+            // la elimino de la mano
+            $elem.remove();
+
+            // la añado a muestra
+            turnOverCard($sample, sample);
+
+            // creo un elemento para la nueva carta en mano
+            var $htmlCard = $('<div class="card"></div>');
+
+            // le añado su información
+            $htmlCard.data('card', oldSample);
+
+            // añado la carta a la caja contenedora de la GUI
+            $myCards.append($htmlCard);
+
+            // Pongo la carta bocarriba
+            turnOverCard($htmlCard, oldSample);
+        }
+    });
+
+    socket.on('latePlayed', function (playerName, card) {
+        console.log(playerName + ' ha jugado ' , card);
+        if (playerName === name){
+            onPlayCardLate(card);
+        }else{
+            onOponnentPlayCardLate(card);
+        }
+        finishChrono();
+    });
+
     socket.on('winnerHand', function (playerName) {
         $scores.append('<p><strong>' + playerName + ' ha ganado la mano</strong></p>');
         finishChrono();
@@ -232,9 +293,9 @@
 
     socket.on('winners', function (winnersNames) {
         if(winnersNames.length == 1)
-            console.log(winnersNames[0] + ' ha ganado la partida');
+            alert(winnersNames[0] + ' ha ganado la partida');
         else if (winnersNames.length > 0) {
-            console.log('Han ganado la partida: ' + winnersNames.join(', '));
+            alert('Han ganado la partida: ' + winnersNames.join(', '));
         } else
             console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
 

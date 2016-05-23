@@ -81,7 +81,6 @@ var listeners = function (io) {
                 console.log('Se ha desconectado: ' + user.name);
                 removeUserFromGame(user);
                 user.connect = false;
-                user.game = undefined;
             } else {
                 console.log('Alguien se ha desconectado');
             }
@@ -148,6 +147,19 @@ var listeners = function (io) {
                     game = global.games[user.game];
                     if (game) {
                         game.play(user.name, indexCard);
+                    }
+                }
+            }
+        });
+
+        socket.on('change sample', function (indexCard) {
+            var user = global.getUserBySocket(socket),
+                game;
+            if (user) {
+                if (user.game) {
+                    game = global.games[user.game];
+                    if (game) {
+                        game.tryChangeSample(user.name, indexCard);
                     }
                 }
             }

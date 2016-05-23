@@ -88,6 +88,17 @@ Player.prototype.getCard = function (id) {
     return undefined;
 };
 
+Player.prototype.removeCard = function (card) {
+    'use strict';
+    var index = this.cards.indexOf(card);
+    if (index === -1){
+        console.log('[UNREACHABLE], Player - removeCard, la carta no estaba en la baraja');
+    }
+
+    //elimino de la mano la carta
+    this.cards.splice(index, 1);
+};
+
 Player.prototype.cardEarned = function (card) {
     'use strict';
 
