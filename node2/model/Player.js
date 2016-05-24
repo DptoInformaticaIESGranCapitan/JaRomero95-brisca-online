@@ -88,15 +88,24 @@ Player.prototype.getCard = function (id) {
     return undefined;
 };
 
-Player.prototype.removeCard = function (card) {
+Player.prototype.removeCard = function (id) {
     'use strict';
-    var index = this.cards.indexOf(card);
-    if (index === -1){
-        console.log('[UNREACHABLE], Player - removeCard, la carta no estaba en la baraja');
+    var i, card;
+    for (i = 0; i < this.cards.length; i++) {
+        card = this.cards[i];
+
+        //console.log('El id de la carta es ', card.id);
+        //console.log('Mientras que el id enviado a eliminar es ', id);
+
+        if (card.id === id) {
+            //elimino de la mano la carta
+            this.cards.splice(i, 1);
+            //console.log('Se ha eliminado la carta');
+            return;
+        }
     }
 
-    //elimino de la mano la carta
-    this.cards.splice(index, 1);
+    console.log('No se ha podido eliminar la carta en Player.removeCard');
 };
 
 Player.prototype.cardEarned = function (card) {

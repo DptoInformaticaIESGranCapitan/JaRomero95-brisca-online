@@ -45,7 +45,7 @@
 
         $num.text(--restCards);
 
-        if(restCards < 1){
+        if (restCards < 1) {
             $sample.addClass('semi-transparent');
             $num.css('background-image', 'none');
         }
@@ -55,9 +55,21 @@
      * Muestra una carta que estaba bocabajo
      * @param $elem elemento del DOM que contiene la carta
      * @param card información de la carta para establecerla en el elemento
+     * @param oldCard
      */
-    function turnOverCard($elem, card) {
-        var classStr = card.suit + card.num.name;
+    function turnOverCard($elem, card, oldCard) {
+        var classStr = card.suit + card.num.name,
+            oldClassStr;
+
+        // si hay carta antigua, elimino la clase
+        if (oldCard) {
+            oldClassStr = oldCard.suit + oldCard.num.name;
+            console.log('intento eliminar la clase ', oldClassStr);
+            $elem.removeClass(oldClassStr);
+        } else {
+            console.log('No hay carta antigua');
+        }
+
         $elem.addClass(classStr);
     }
 
@@ -90,6 +102,113 @@
         console.log('[UNRECHEABLE], getElementCard, no se ha encontrado la carta');
         return undefined;
     }
+
+    function onPlayCard(card) {
+        // recojo el elemento que contiene esa carta
+        var $elem = getElementCard(card.id);
+
+        // lo elimino de las cartas del usuario
+        $elem.remove();
+
+        // lo añado a carta jugada
+        $myPlay.html($elem);
+    }
+
+    function onPlayCardLate(card) {
+        var $elem = $('<div class="card"></div>');
+        $myPlay.html($elem);
+        turnOverCard($elem, card);
+    }
+
+    function onOponnentPlayCardLate(card) {
+        var $elem = $('<div class="card"></div>');
+        $oponnentPlay.html($elem);
+        turnOverCard($elem, card);
+    }
+
+    function onOponnentPlayCard(card) {
+        // recojo cualquier carta bocaabajo de su contenedor
+        var $elem = $('#oponnent-cards .card').eq(0);
+
+        // lo elimino de ese contenedor
+        $elem.remove();
+
+        // lo añado a carta jugada del oponente
+        $oponnentPlay.html($elem);
+
+        turnOverCard($elem, card);
+    }
+
+    /**
+     * Envía al servidor la carta sobre la que se ha clickado
+     */
+    $myCards.click(".cards", function (ev) {
+        var elem = $(ev.target),
+            card = elem.data('card');
+        console.log('Ha intentado jugar: ' + card.id);
+        socket.emit('play', card.id);
+    });
+
+    $sample.click(function () {
+        var elem = $(this),
+            actualSample,
+            idCardToChange,
+            $elemCardToChange,
+            cardToChange;
+
+        // cojo la carta de muestra
+        actualSample = $sample.data('card');
+
+        // Compruebo si la muestra es mayor que la carta 7 => value: 5
+        if (actualSample.num.value > 5) {
+
+            // en función del palo de muestra, busco la carta 7 en la baraja
+            switch (actualSample.suit) {
+                case 'espadas':
+                    idCardToChange = 7;
+                    break;
+                case 'bastos':
+                    idCardToChange = 17;
+                    break;
+                case 'oros':
+                    idCardToChange = 27;
+                    break;
+                case 'copas':
+                    idCardToChange = 37;
+                    break;
+            }
+        } else {
+            // compruebo que la muestra es mayor que la carta 2 => value: 1
+            if (actualSample.num.value > 1) {
+                // en función del palo de muestra, busco la carta 2 en la baraja
+                switch (actualSample.suit) {
+                    case 'espadas':
+                        idCardToChange = 2;
+                        break;
+                    case 'bastos':
+                        idCardToChange = 12;
+                        break;
+                    case 'oros':
+                        idCardToChange = 22;
+                        break;
+                    case 'copas':
+                        idCardToChange = 32;
+                        break;
+                }
+            }
+        }
+
+        // recojo el elemento de la carta necesitada para cambiar la brisca de la mano del usuario
+        $elemCardToChange = getElementCard(idCardToChange);
+
+        // si existe un elemento con esa carta
+        if ($elemCardToChange) {
+            cardToChange = $elemCardToChange.data('card');
+
+            // tengo la carta necesaria, así que la envío para cambiar
+            socket.emit('change sample', cardToChange.id);
+        }
+    });
 
     /**
      * Buscar una partida
@@ -153,22 +272,6 @@
     });
 
     /**
-     * Envía al servidor la carta sobre la que se ha clickado
-     */
-    $myCards.click(".cards", function (ev) {
-        var elem    = $(ev.target),
-            card   = elem.data('card');
-        console.log('Ha intentado jugar: '+card.id);
-        socket.emit('play', card.id);
-    });
-
-    $sample.click(function () {
-        var elem    = $(this),
-            card   = elem.data('card');
-        socket.emit('change sample', card.id);
-    });
-
-    /**
      * Recibe la muestra de la partida
      */
     socket.on('sample', function (card) {
@@ -199,69 +302,38 @@
         console.log('El jugador ' + player + ' ha recibido una carta');
     });
 
-    function onPlayCard(card){
-        // recojo el elemento que contiene esa carta
-        var $elem = getElementCard(card.id);
-
-        // lo elimino de las cartas del usuario
-        $elem.remove();
-
-        // lo añado a carta jugada
-        $myPlay.html($elem);
-    }
-
-    function onPlayCardLate(card){
-        var $elem = $('<div class="card"></div>');
-        $myPlay.html($elem);
-        turnOverCard($elem, card);
-    }
-
-    function onOponnentPlayCardLate(card){
-        var $elem = $('<div class="card"></div>');
-        $oponnentPlay.html($elem);
-        turnOverCard($elem, card);
-    }
-
-    function onOponnentPlayCard(card){
-        // recojo cualquier carta bocaabajo de su contenedor
-        var $elem = $('#oponnent-cards .card').eq(0);
-
-        // lo elimino de ese contenedor
-        $elem.remove();
-
-        // lo añado a carta jugada del oponente
-        $oponnentPlay.html($elem);
-
-        turnOverCard($elem, card);
-    }
-
     /**
      * Notifica que un jugador ha jugado una carta
      */
     socket.on('played', function (playerName, card) {
-        console.log(playerName + ' ha jugado ' , card);
-        if (playerName === name){
+        console.log(playerName + ' ha jugado ', card);
+        if (playerName === name) {
             onPlayCard(card);
-        }else{
+        } else {
             onOponnentPlayCard(card);
         }
         finishChrono();
     });
 
     socket.on('change sample', function (playerName, oldSample, sample) {
-        // si yo la he cambiado
-        if(playerName === name){
-            // recojo la nueva muestra
-            var $elem = getElementCard(sample.id);
+        var $elem, $htmlCard;
 
-            // la elimino de la mano
+        console.log('Ha llegado un change sample del usuario ', playerName, ' donde la antigua muestra era ', oldSample.suit + ' - ', oldSample.num.name, ' y la nueva muestra es ', sample.suit + ' - ', sample.num.name);
+
+        // si yo la he cambiado
+        if (playerName === name) {
+            // recojo el elemento de mi mano de la nueva muestra
+            $elem = getElementCard(sample.id);
+
+            // lo elimino de la mano
             $elem.remove();
 
-            // la añado a muestra
-            turnOverCard($sample, sample);
+            // añado la carta a muestra
+            $sample.data('card', sample);
+            turnOverCard($sample, sample, oldSample);
 
             // creo un elemento para la nueva carta en mano
-            var $htmlCard = $('<div class="card"></div>');
+            $htmlCard = $('<div class="card"></div>');
 
             // le añado su información
             $htmlCard.data('card', oldSample);
@@ -271,14 +343,32 @@
 
             // Pongo la carta bocarriba
             turnOverCard($htmlCard, oldSample);
+        } else {
+            // aquí si la muestra no la he cambiado yo mismo
+
+            // recojo cualquier carta bocaabajo de su contenedor
+            $elem = $('#oponnent-cards .card').eq(0);
+
+            // lo elimino de ese contenedor
+            $elem.remove();
+
+            // añado la carta a muestra
+            $sample.data('card', sample);
+            turnOverCard($sample, sample, oldSample);
+
+            // creo el elemento html
+            $htmlCard = $('<div class="card"></div>');
+
+            // añado la carta a la caja contenedora de la GUI
+            $oponnentCards.append($htmlCard);
         }
     });
 
     socket.on('latePlayed', function (playerName, card) {
-        console.log(playerName + ' ha jugado ' , card);
-        if (playerName === name){
+        console.log(playerName + ' ha jugado ', card);
+        if (playerName === name) {
             onPlayCardLate(card);
-        }else{
+        } else {
             onOponnentPlayCardLate(card);
         }
         finishChrono();
@@ -292,7 +382,7 @@
     });
 
     socket.on('winners', function (winnersNames) {
-        if(winnersNames.length == 1)
+        if (winnersNames.length == 1)
             alert(winnersNames[0] + ' ha ganado la partida');
         else if (winnersNames.length > 0) {
             alert('Han ganado la partida: ' + winnersNames.join(', '));

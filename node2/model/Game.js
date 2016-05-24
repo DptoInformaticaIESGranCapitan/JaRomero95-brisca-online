@@ -4,7 +4,7 @@ var Deck = require('./Deck.js');//recibo el constructor
 
 var numPlayers = 2,
     timeMargin = 2,
-    timeTurn = 10;
+    timeTurn = 6000;
 
 // TODO si el usuario está desconectado de la partida, tirar automáticamente!
 function Game(io) {
@@ -391,6 +391,8 @@ Game.prototype.handlerState = function () {
 
             this.notifyAll('winners', winnerNames);
 
+            this.removeUsersGame();
+
             break;
     }
 
@@ -621,6 +623,79 @@ Game.prototype.hasTurn = function(player){
 Game.prototype.tryChangeSample = function(userName, id){
     'use strict';
     var player = this.getPlayer(userName),
+        card,
+        neccesaryCardId;
+    if (player) {
+        if (this.hasTurn(player)){
+            card = player.getCard(id);
+
+            // existe la carta que el usuario quiere canjear
+            if ( card ) {
+
+                // AQUÍ el usuario tiene la carta enviada y tiene el turno
+
+                if (this.sample.num.value > 5){
+
+                    // en función del palo de muestra, busco la carta 7 en la baraja
+                    switch (this.sample.suit){
+                        case 'espadas':
+                            neccesaryCardId = 7;
+                            break;
+                        case 'bastos':
+                            neccesaryCardId = 17;
+                            break;
+                        case 'oros':
+                            neccesaryCardId = 27;
+                            break;
+                        case 'copas':
+                            neccesaryCardId = 37;
+                            break;
+                    }
+                } else{
+                    // compruebo que la muestra es mayor que la carta 2 => value: 1
+                    if (this.sample.num.value > 1){
+                        // en función del palo de muestra, busco la carta 2 en la baraja
+                        switch (this.sample.suit){
+                            case 'espadas':
+                                neccesaryCardId = 2;
+                                break;
+                            case 'bastos':
+                                neccesaryCardId = 12;
+                                break;
+                            case 'oros':
+                                neccesaryCardId = 22;
+                                break;
+                            case 'copas':
+                                neccesaryCardId = 32;
+                                break;
+                        }
+                    } else {
+                        console.log('La carta de muestra es el 2, esa no se puede cambiar');
+                        neccesaryCardId = undefined;
+                    }
+                }
+
+                // si la carta de muesta no es 2, aquí ya se tiene la carta necesaria
+                if (neccesaryCardId){
+                    if (neccesaryCardId === id){
+                        this.changeSample(player, card);
+                    }
+                }
+
+            } else {
+                console.log('El player no tiene esa carta en la mano');
+            }
+        } else {
+            console.log('el player no tiene el turno');
+        }
+    } else {
+        console.log('el player no existe');
+    }
+};
+
+Game.prototype.tryChangeSample2 = function(userName, id){
+    'use strict';
+    var player = this.getPlayer(userName),
         card;
     if (player) {
         if (this.hasTurn(player)){
@@ -633,28 +708,42 @@ Game.prototype.tryChangeSample = function(userName, id){
                 if(card.suit === this.sample.suit){
 
                     // compruebo si la carta enviada es el 7 => value 5
-                    if(card.num.value === 5){
+                    if(card.num.name === 'Siete'){
 
                         // compruebo si la carta de muestra es mayor que el 7
                         if(this.sample.num.value > card.num.value){
 
                             // aquí ya hago el cambio
                             this.changeSample(player, card);
+                        } else {
+                            console.log('la carta de muestra actual no es mayor que 7');
                         }
 
-                    // compruebo si la carta enviada es el 2 => value 1
-                    } else if (card.num.value === 2) {
+                        // compruebo si la carta enviada es el 2 => value 1
+                    } else if (card.num.name === 'Dos') {
 
                         // compruebo si la carta de muestra es mayor que el 2 y menor que el 7 => value 5
                         if(this.sample.num.value > card.num.value && this.sample.value < 5){
 
                             // aquí ya hago el cambio
                             this.changeSample(player, card);
+                        } else {
+                            console.log('la carta de muestra actual no es mayor que 2');
                         }
+                    } else {
+                        console.log('La carta actual no es el 2 ni el 7');
                     }
+                } else {
+                    console.log('La carta enviada no es una muestra');
                 }
+            } else {
+                console.log('El player no tiene esa carta en la mano');
             }
+        } else {
+            console.log('el player no tiene el turno');
         }
+    } else {
+        console.log('el player no existe');
     }
 };
 
@@ -663,7 +752,7 @@ Game.prototype.changeSample = function(player, card){
     var oldSample = this.sample;
 
     // elimino la carta de la mano del usuario
-    player.removeCard(card);
+    player.removeCard(card.id);
 
     // añado la nueva muestra al principio de la baraja (que será la última en repartir)
     this.deck.cards.unshift(card);
@@ -735,6 +824,26 @@ Game.prototype.automaticPlayCard = function(player){
         }else {
             console.log('No ha jugado carta, no debería suceder');
         }
+    }
+};
+
+Game.prototype.removeUsersGame = function() {
+    var player, i, user;
+    /**
+     * Los usuarios son los mismos que los jugadores,
+     * para coger cada uno de ellos, recorro los players
+     * y busco sus nombres en el objeto global de usuarios.
+     */
+    for (i = 0; i < this.players.length; i++) {
+        player = this.players[i];
+        user = this.users[name];
+        
+        if(user){
+            user.game = undefined;
+        }else {
+            console.log('¡¡!! esto no debería darse - Game.removeUsersGame');
+        }
+
     }
 };
 
