@@ -9,3 +9,10 @@ wreck-them/web/bundles/framework
 node/node_modules
 node2/node_modules
 node/npm-debug.log
+
+brisca/vendor
+brisca/var/cache
+brisca/var/logs
+brisca/var/sessions
+brisca/var/bootstrap.php.cache
+brisca/web/bundles/framework
