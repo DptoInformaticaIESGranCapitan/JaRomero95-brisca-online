@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    {{ form_start(form) }}
+
+    {{ form_widget(form) }}
+    {#{{ form_row(form.plainPassword.first) }}#}
+    {#{{ form_row(form.plainPassword.second) }}#}
+
+    <button type="submit">Guardar cambios</button>
+    {{ form_end(form) }}
+{% endblock %}

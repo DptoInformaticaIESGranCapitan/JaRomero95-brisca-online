@@ -697,6 +697,12 @@ Game.prototype.tryChangeSample2 = function(userName, id){
     'use strict';
     var player = this.getPlayer(userName),
         card;
+
+    if (!this.hasCards()){
+        console.log('NO HAY CARTAS');
+        return;
+    }
+
     if (player) {
         if (this.hasTurn(player)){
             card = player.playCard(id);
@@ -748,8 +754,8 @@ Game.prototype.tryChangeSample2 = function(userName, id){
 };
 
 Game.prototype.changeSample = function(player, card){
-    // almaceno la antigua muestra
-    var oldSample = this.sample;
+    // almaceno la antigua muestra y la elimino de la baraja
+    var oldSample = this.deck.cards.shift();
 
     // elimino la carta de la mano del usuario
     player.removeCard(card.id);
@@ -836,7 +842,7 @@ Game.prototype.removeUsersGame = function() {
      */
     for (i = 0; i < this.players.length; i++) {
         player = this.players[i];
-        user = this.users[name];
+        user = this.users[player.name];
         
         if(user){
             user.game = undefined;

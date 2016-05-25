@@ -1,0 +1,11 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+    {% if user %}
+        {% include 'includes/game-container.html.twig' %}
+    {% else %}
+        <p>Inicio</p>
+    {% endif %}
+
+{% endblock %}
