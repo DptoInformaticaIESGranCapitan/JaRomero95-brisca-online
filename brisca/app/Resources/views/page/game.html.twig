@@ -1,9 +1,12 @@
-{% extends '../layout.html.twig' %}
+{% extends 'layout.html.twig' %}
 
 {% block stylesheets %}
     {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('css/game.css') }}">
+    {# css en <style> para acceder a asset() #}
     <style>
-        .card { background: white url('{{ asset('img/backCard.png') }}') no-repeat; }
+        .card { background-image: url('{{ asset('img/backCard.png') }}'); }
 
         .espadasAs{ background-image: url('{{ asset('img/cards/espadasAs.png') }}'); }
         .espadasDos{ background-image: url('{{ asset('img/cards/espadasDos.png') }}'); }
@@ -57,106 +60,8 @@
 {% endblock %}
 
 {% block content %}
-    <style>
-        #game-container div{
-            border: 1px solid black;
-            padding: 3px;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        #game-container{
-            width: 300px;
-            background: greenyellow;
-        }
-
-        .player-cards, .play {
-            height: 170px;
-        }
-
-        .card {
-            background: white url('{{ asset('img/backCard.png') }}') no-repeat;
-            width: 100px;
-            height: 150px;
-            background-size: 100% 100%;
-            padding: 12px;
-            border-radius: 5px;
-            background-origin: content-box;
-            display: inline-block;
-            vertical-align: top;
-        }
-
-        #game-container {
-            display: inline-block;
-            width: 49%;
-            vertical-align: top;
-        }
-
-        #game-info {
-            display: inline-block;
-            width: 49%;
-            vertical-align: top;
-        }
-
-        #scores {
-            height: 500px;
-            overflow-y: scroll;
-        }
-
-        #chrono {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-
-        .semi-transparent {
-            opacity: 0.6;
-        }
-
-        .espadasAs{ background-image: url('{{ asset('img/cards/espadasAs.png') }}'); }
-        .espadasDos{ background-image: url('{{ asset('img/cards/espadasDos.png') }}'); }
-        .espadasTres{ background-image: url('{{ asset('img/cards/espadasTres.png') }}'); }
-        .espadasCuatro{ background-image: url('{{ asset('img/cards/espadasCuatro.png') }}'); }
-        .espadasCinco{ background-image: url('{{ asset('img/cards/espadasCinco.png') }}'); }
-        .espadasSeis{ background-image: url('{{ asset('img/cards/espadasSeis.png') }}'); }
-        .espadasSiete{ background-image: url('{{ asset('img/cards/espadasSiete.png') }}'); }
-        .espadasSota{ background-image: url('{{ asset('img/cards/espadasSota.png') }}'); }
-        .espadasCaballo{ background-image: url('{{ asset('img/cards/espadasCaballo.png') }}'); }
-        .espadasRey{ background-image: url('{{ asset('img/cards/espadasRey.png') }}'); }
-
-        .bastosAs{ background-image: url('{{ asset('img/cards/bastosAs.png') }}'); }
-        .bastosDos{ background-image: url('{{ asset('img/cards/bastosDos.png') }}'); }
-        .bastosTres{ background-image: url('{{ asset('img/cards/bastosTres.png') }}'); }
-        .bastosCuatro{ background-image: url('{{ asset('img/cards/bastosCuatro.png') }}'); }
-        .bastosCinco{ background-image: url('{{ asset('img/cards/bastosCinco.png') }}'); }
-        .bastosSeis{ background-image: url('{{ asset('img/cards/bastosSeis.png') }}'); }
-        .bastosSiete{ background-image: url('{{ asset('img/cards/bastosSiete.png') }}'); }
-        .bastosSota{ background-image: url('{{ asset('img/cards/bastosSota.png') }}'); }
-        .bastosCaballo{ background-image: url('{{ asset('img/cards/bastosCaballo.png') }}'); }
-        .bastosRey{ background-image: url('{{ asset('img/cards/bastosRey.png') }}'); }
-
-        .orosAs{ background-image: url('{{ asset('img/cards/orosAs.png') }}'); }
-        .orosDos{ background-image: url('{{ asset('img/cards/orosDos.png') }}'); }
-        .orosTres{ background-image: url('{{ asset('img/cards/orosTres.png') }}'); }
-        .orosCuatro{ background-image: url('{{ asset('img/cards/orosCuatro.png') }}'); }
-        .orosCinco{ background-image: url('{{ asset('img/cards/orosCinco.png') }}'); }
-        .orosSeis{ background-image: url('{{ asset('img/cards/orosSeis.png') }}'); }
-        .orosSiete{ background-image: url('{{ asset('img/cards/orosSiete.png') }}'); }
-        .orosSota{ background-image: url('{{ asset('img/cards/orosSota.png') }}'); }
-        .orosCaballo{ background-image: url('{{ asset('img/cards/orosCaballo.png') }}'); }
-        .orosRey{ background-image: url('{{ asset('img/cards/orosRey.png') }}'); }
-
-        .copasAs{ background-image: url('{{ asset('img/cards/copasAs.png') }}'); }
-        .copasDos{ background-image: url('{{ asset('img/cards/copasDos.png') }}'); }
-        .copasTres{ background-image: url('{{ asset('img/cards/copasTres.png') }}'); }
-        .copasCuatro{ background-image: url('{{ asset('img/cards/copasCuatro.png') }}'); }
-        .copasCinco{ background-image: url('{{ asset('img/cards/copasCinco.png') }}'); }
-        .copasSeis{ background-image: url('{{ asset('img/cards/copasSeis.png') }}'); }
-        .copasSiete{ background-image: url('{{ asset('img/cards/copasSiete.png') }}'); }
-        .copasSota{ background-image: url('{{ asset('img/cards/copasSota.png') }}'); }
-        .copasCaballo{ background-image: url('{{ asset('img/cards/copasCaballo.png') }}'); }
-        .copasRey{ background-image: url('{{ asset('img/cards/copasRey.png') }}'); }
-    </style>
     <h3>Juego</h3>
+    <button id="search-game">Buscar partida</button>
     <div id="game-container">
 
         <div style="display: none">

@@ -25,7 +25,7 @@ class UserType extends AbstractType
                     'type' => PasswordType::class,
                     'invalid_message' => 'Las contraseñas deben coincidir',
                     'first_options' => array('label' => 'Contraseña'),
-                    'second_options' => array('label' => 'Repite la contraseña'),
+                    'second_options' => array('label' => 'Confirmar contraseña'),
                     'required' => false
                 )
             );

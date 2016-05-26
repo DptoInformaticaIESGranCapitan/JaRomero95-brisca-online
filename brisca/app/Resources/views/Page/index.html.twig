@@ -1,11 +1,91 @@
 {% extends 'layout.html.twig' %}
 
+{% block scripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function () {
+            $('.slider').slider({
+                full_width: true,
+                indicators: false
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
 
-    {% if user %}
-        {% include 'includes/game-container.html.twig' %}
-    {% else %}
-        <p>Inicio</p>
-    {% endif %}
+    <div class="slider">
+
+        {% if not user %}
+            <div class="card container-in-slider">
+                <div class="card-content">
+                    <form action="{{ path('homepage') }}" method="post">
+                        <p class="card-title center">Entrar</p>
+
+                        {% if error %}
+                            {% set errorMsg = error.messageKey|trans(error.messageData, 'security') %}
+
+                            {% if errorMsg == 'Invalid credentials.' %}
+                                {% set errorMsg = 'Email o contraseña incorrectos.' %}
+                            {% endif %}
+
+                            <div class="red lighten-4 red-text text-darken-2 paddings-m">
+                                    <i class="material-icons" style="vertical-align: middle">error</i>
+                                    {{ errorMsg }}
+                            </div>
+                        {% endif %}
+
+                        {% for flash_message in app.session.flashBag.get('register') %}
+                            <div class="green lighten-4 green-text text-darken-2 paddings-m">
+                                <i class="material-icons" style="vertical-align: middle">done</i>
+                                {{ flash_message }}
+                            </div>
+                        {% endfor %}
+
+                        <label for="username">Email:</label>
+                        <input type="text" id="username" name="_username" value="{{ last_username }}" placeholder="Email"/>
+
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" name="_password" placeholder="Contraseña"/>
+
+                        {#
+                            If you want to control the URL the user
+                            is redirected to on success (more details below)
+                            <input type="hidden" name="_target_path" value="/account" />
+                        #}
+                        <div class="card-action">
+                            <button class="btn waves-effect waves-light margin-right-l" type="submit">
+                                Entrar
+                                <i class="material-icons right">send</i>
+                            </button>
+                            <div class="hide-on-med-and-up margin-bottom-m"></div>
+                            <a href="{{ path('register') }}">Registrarse</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+
+            <div id="index-chat-container" class="card container-in-slider">
+                {% include 'includes/chat.html.twig' %}
+            </div>
+
+        {% endif %}
+
+        <ul class="slides">
+            <li>
+                <img src="http://lorempixel.com/580/250/nature/1"> <!-- random image -->
+            </li>
+            <li>
+                <img src="http://lorempixel.com/580/250/nature/2"> <!-- random image -->
+            </li>
+            <li>
+                <img src="http://lorempixel.com/580/250/nature/3"> <!-- random image -->
+            </li>
+            <li>
+                <img src="http://lorempixel.com/580/250/nature/4"> <!-- random image -->
+            </li>
+        </ul>
+    </div>
 
 {% endblock %}

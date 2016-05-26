@@ -2,35 +2,64 @@
 
 {% block body %}
     {% block header %}
-        <h1><a href="{{ path('homepage') }}">{{ title }}</a></h1>
+
+        <ul id="dropdown1" class="dropdown-content">
+            <li><a href="/perfil">Perfil</a></li>
+            <li><a href="/logout">Salir</a></li>
+        </ul>
+
+        <nav>
+            <div class="nav-wrapper">
+                <a href="{{ path('homepage') }}" class="brand-logo left">
+                    <span class="hide-on-med-and-up">Brisca</span>
+                    <span class="hide-on-small-only">{{ title }}</span>
+                </a>
+                {% if user %}
+                    <ul id="nav-mobile" class="right">
+                        <li class="{% if currentPath == path('play') %}active{% endif %}">
+                            <a href="/jugar">
+                                Jugar
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-button" href="#" data-activates="dropdown1">
+                                <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="user-img">
+                                <span class="hide-on-small-only margin-right-m"></span>
+                                <span class="hide-on-small-only">{{ user.nick }}</span>
+                            </a>
+                        </li>
+                        <li class="hide-on-med-and-up">
+                            <a href="#">
+                                <i class="material-icons">textsms</i>
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </nav>
+
     {% endblock %}
 
-    {% if user %}
-        Usuario: {{ user.email }}
-
-        {% if user.imgPath %}
-            <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" alt="Foto de perfil">
-        {% else %}
-            no image
-        {% endif %}
-
-        <a href="{{ path('perfil') }}">Perfil</a>
-        <a href="{{ path('logout') }}">Cerrar sesión</a>
-
-        {% include 'includes/chat.html.twig' %}
-
-        <button id="search-game">Buscar partida</button>
-    {% else %}
-        <a href="{{ path('login') }}">Entrar</a>
-        <a href="{{ path('register') }}">Registrarse</a>
-    {% endif %}
-
-
-    {% block content %}
-
-    {% endblock %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
     {% block footer %}
+        <footer class="page-footer">
+            <div class="container center">
+                <h5 class="white-text">Contacto</h5>
 
+                <div>
+                    <a class="grey-text text-lighten-3" href="#">Twitter</a>
+                    <a class="grey-text text-lighten-3" href="#">GitHub</a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <div class="container">
+                    © 2016 Juan Antonio Romero Molero. <span
+                            class="hide-on-small-only">Todos los derechos reservados.</span>
+                </div>
+            </div>
+        </footer>
     {% endblock %}
 {% endblock %}

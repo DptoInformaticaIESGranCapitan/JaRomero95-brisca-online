@@ -16,13 +16,20 @@ class UserController extends Controller
      */
     public function registerAction(Request $request)
     {
-        // FIXME denegar acceso al registro a usuarios logueados
+        // denegar acceso al registro a usuarios logueados
+        $user = $this->getUser();
+        if($user){
+            return $this->redirectToRoute('homepage');
+        }
+
+
         // 1) build the form
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
 
             // 3) Encode the password (you could also do this via Doctrine listener)
@@ -32,19 +39,22 @@ class UserController extends Controller
 
             // 4) save the User!
             $em = $this->getDoctrine()->getManager();
-            $user->uploadImg();
+
+            $rootDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/images';
+            $user->uploadImg($rootDir);
+
             $em->persist($user);
             $em->flush();
 
-//            TODO flash éxito!
-            // ... do any other work - like sending them an email, etc
-            // maybe set a "flash" success message for the user
+            $this->addFlash('register', '¡Te has registrado con éxito!');
 
             return $this->redirectToRoute('homepage');
         }
 
         return $this->render('user/registro.html.twig',
-            array('form' => $form->createView())
+            array(
+                'form' => $form->createView()
+            )
         );
     }
 
@@ -89,25 +99,4 @@ class UserController extends Controller
         );
     }
 
-    /**
-     * @Route("/login", name="login")
-     */
-    public function loginAction(Request $request)
-    {
-        $authenticationUtils = $this->get('security.authentication_utils');
-
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        return $this->render('user/login.html.twig',
-            array(
-                // last username entered by the user
-                'last_username' => $lastUsername,
-                'error' => $error,
-            )
-        );
-    }
 }

@@ -6,10 +6,11 @@ security:
         AppBundle\Entity\User: bcrypt
 
     access_control:
-        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/entrar, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/.+, roles: ROLE_USER }
+        - { path: ^/registro, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/_profiler*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/.+, roles: ROLE_USER }
 
 
 
@@ -27,8 +28,8 @@ security:
             provider: our_db_provider
             anonymous: ~
             form_login:
-                login_path: login
-                check_path: login
+                login_path: /
+                check_path: /
             logout:
                 path:   /logout
                 target: /
