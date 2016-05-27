@@ -31,24 +31,25 @@ class UserController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if($user->getPlainPassword()){
+                // 3) Encode the password (you could also do this via Doctrine listener)
+                $password = $this->get('security.password_encoder')
+                    ->encodePassword($user, $user->getPlainPassword());
+                $user->setPassword($password);
 
-            // 3) Encode the password (you could also do this via Doctrine listener)
-            $password = $this->get('security.password_encoder')
-                ->encodePassword($user, $user->getPlainPassword());
-            $user->setPassword($password);
+                // 4) save the User!
+                $em = $this->getDoctrine()->getManager();
 
-            // 4) save the User!
-            $em = $this->getDoctrine()->getManager();
+                $rootDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/images';
+                $user->uploadImg($rootDir);
 
-            $rootDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/images';
-            $user->uploadImg($rootDir);
+                $em->persist($user);
+                $em->flush();
 
-            $em->persist($user);
-            $em->flush();
-
-            $this->addFlash('register', '¡Te has registrado con éxito!');
+                $this->addFlash('register', '¡Te has registrado con éxito!');
 
             return $this->redirectToRoute('homepage');
+            }
         }
 
         return $this->render('user/registro.html.twig',
@@ -80,6 +81,9 @@ class UserController extends Controller
             $rootDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/images';
             $user->uploadImg($rootDir);
 
+            if(!$user->getImgPath()){
+                $user->setImgPath('noUserImg.png');
+            }
 
             $em = $this->getDoctrine()->getManager();
 //            $user->uploadImg();

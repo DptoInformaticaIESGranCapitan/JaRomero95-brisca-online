@@ -1,0 +1,266 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <link rel="stylesheet" href="{{ asset('css/game3.css') }}">
+    {# css en <style> para acceder a asset() #}
+    <style>
+        .game-card {
+            background-image: url('{{ asset('img/backCard.png') }}');
+        }
+
+        .espadasAs {
+            background-image: url('{{ asset('img/cards/espadasAs.png') }}');
+        }
+
+        .espadasDos {
+            background-image: url('{{ asset('img/cards/espadasDos.png') }}');
+        }
+
+        .espadasTres {
+            background-image: url('{{ asset('img/cards/espadasTres.png') }}');
+        }
+
+        .espadasCuatro {
+            background-image: url('{{ asset('img/cards/espadasCuatro.png') }}');
+        }
+
+        .espadasCinco {
+            background-image: url('{{ asset('img/cards/espadasCinco.png') }}');
+        }
+
+        .espadasSeis {
+            background-image: url('{{ asset('img/cards/espadasSeis.png') }}');
+        }
+
+        .espadasSiete {
+            background-image: url('{{ asset('img/cards/espadasSiete.png') }}');
+        }
+
+        .espadasSota {
+            background-image: url('{{ asset('img/cards/espadasSota.png') }}');
+        }
+
+        .espadasCaballo {
+            background-image: url('{{ asset('img/cards/espadasCaballo.png') }}');
+        }
+
+        .espadasRey {
+            background-image: url('{{ asset('img/cards/espadasRey.png') }}');
+        }
+
+        .bastosAs {
+            background-image: url('{{ asset('img/cards/bastosAs.png') }}');
+        }
+
+        .bastosDos {
+            background-image: url('{{ asset('img/cards/bastosDos.png') }}');
+        }
+
+        .bastosTres {
+            background-image: url('{{ asset('img/cards/bastosTres.png') }}');
+        }
+
+        .bastosCuatro {
+            background-image: url('{{ asset('img/cards/bastosCuatro.png') }}');
+        }
+
+        .bastosCinco {
+            background-image: url('{{ asset('img/cards/bastosCinco.png') }}');
+        }
+
+        .bastosSeis {
+            background-image: url('{{ asset('img/cards/bastosSeis.png') }}');
+        }
+
+        .bastosSiete {
+            background-image: url('{{ asset('img/cards/bastosSiete.png') }}');
+        }
+
+        .bastosSota {
+            background-image: url('{{ asset('img/cards/bastosSota.png') }}');
+        }
+
+        .bastosCaballo {
+            background-image: url('{{ asset('img/cards/bastosCaballo.png') }}');
+        }
+
+        .bastosRey {
+            background-image: url('{{ asset('img/cards/bastosRey.png') }}');
+        }
+
+        .orosAs {
+            background-image: url('{{ asset('img/cards/orosAs.png') }}');
+        }
+
+        .orosDos {
+            background-image: url('{{ asset('img/cards/orosDos.png') }}');
+        }
+
+        .orosTres {
+            background-image: url('{{ asset('img/cards/orosTres.png') }}');
+        }
+
+        .orosCuatro {
+            background-image: url('{{ asset('img/cards/orosCuatro.png') }}');
+        }
+
+        .orosCinco {
+            background-image: url('{{ asset('img/cards/orosCinco.png') }}');
+        }
+
+        .orosSeis {
+            background-image: url('{{ asset('img/cards/orosSeis.png') }}');
+        }
+
+        .orosSiete {
+            background-image: url('{{ asset('img/cards/orosSiete.png') }}');
+        }
+
+        .orosSota {
+            background-image: url('{{ asset('img/cards/orosSota.png') }}');
+        }
+
+        .orosCaballo {
+            background-image: url('{{ asset('img/cards/orosCaballo.png') }}');
+        }
+
+        .orosRey {
+            background-image: url('{{ asset('img/cards/orosRey.png') }}');
+        }
+
+        .copasAs {
+            background-image: url('{{ asset('img/cards/copasAs.png') }}');
+        }
+
+        .copasDos {
+            background-image: url('{{ asset('img/cards/copasDos.png') }}');
+        }
+
+        .copasTres {
+            background-image: url('{{ asset('img/cards/copasTres.png') }}');
+        }
+
+        .copasCuatro {
+            background-image: url('{{ asset('img/cards/copasCuatro.png') }}');
+        }
+
+        .copasCinco {
+            background-image: url('{{ asset('img/cards/copasCinco.png') }}');
+        }
+
+        .copasSeis {
+            background-image: url('{{ asset('img/cards/copasSeis.png') }}');
+        }
+
+        .copasSiete {
+            background-image: url('{{ asset('img/cards/copasSiete.png') }}');
+        }
+
+        .copasSota {
+            background-image: url('{{ asset('img/cards/copasSota.png') }}');
+        }
+
+        .copasCaballo {
+            background-image: url('{{ asset('img/cards/copasCaballo.png') }}');
+        }
+
+        .copasRey {
+            background-image: url('{{ asset('img/cards/copasRey.png') }}');
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/game3.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="row margin-bottom-none">
+        <div id="game-container">
+            <div id="over-game">
+                <button class="btn" id="search-game">Buscar partida</button>
+            </div>
+            <div id="game">
+
+                <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="playerImg" id="iImg">
+                <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="playerImg" id="oponnentImg">
+                {#FIXME Oponnent#}
+
+                <div style="display: none">
+                    <div class="game-card espadasAs"></div>
+                    <div class="game-card espadasDos"></div>
+                    <div class="game-card espadasTres"></div>
+                    <div class="game-card espadasCuatro"></div>
+                    <div class="game-card espadasCinco"></div>
+                    <div class="game-card espadasSeis"></div>
+                    <div class="game-card espadasSiete"></div>
+                    <div class="game-card espadasSota"></div>
+                    <div class="game-card espadasCaballo"></div>
+                    <div class="game-card espadasRey"></div>
+
+                    <div class="game-card bastosAs"></div>
+                    <div class="game-card bastosDos"></div>
+                    <div class="game-card bastosTres"></div>
+                    <div class="game-card bastosCuatro"></div>
+                    <div class="game-card bastosCinco"></div>
+                    <div class="game-card bastosSeis"></div>
+                    <div class="game-card bastosSiete"></div>
+                    <div class="game-card bastosSota"></div>
+                    <div class="game-card bastosCaballo"></div>
+                    <div class="game-card bastosRey"></div>
+
+                    <div class="game-card orosAs"></div>
+                    <div class="game-card orosDos"></div>
+                    <div class="game-card orosTres"></div>
+                    <div class="game-card orosCuatro"></div>
+                    <div class="game-card orosCinco"></div>
+                    <div class="game-card orosSeis"></div>
+                    <div class="game-card orosSiete"></div>
+                    <div class="game-card orosSota"></div>
+                    <div class="game-card orosCaballo"></div>
+                    <div class="game-card orosRey"></div>
+
+                    <div class="game-card copasAs"></div>
+                    <div class="game-card copasDos"></div>
+                    <div class="game-card copasTres"></div>
+                    <div class="game-card copasCuatro"></div>
+                    <div class="game-card copasCinco"></div>
+                    <div class="game-card copasSeis"></div>
+                    <div class="game-card copasSiete"></div>
+                    <div class="game-card copasSota"></div>
+                    <div class="game-card copasCaballo"></div>
+                    <div class="game-card copasRey"></div>
+                </div>
+
+                <div id="oponnent-cards" class="player-cards">
+                </div>
+
+                <div id="oponnent-play" class="play">
+                </div>
+
+                <div id="suit">
+                    <div id="sample" class="game-card"></div>
+                    <div class="game-card deck" id="num"></div>
+                </div>
+
+                <div id="my-play" class="play">
+                </div>
+
+                <div id="my-cards" class="player-cards">
+                </div>
+            </div>
+
+            <div id="game-info" style="display: none">
+                <div id="chrono">0</div>
+                <div>Turno de <span id="turn"></span></div>
+                <div id="scores"></div>
+            </div>
+        </div>
+
+        <div id="chat-container">
+        </div>
+    </div>
+{% endblock %}

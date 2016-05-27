@@ -81,7 +81,6 @@ class User implements UserInterface, \Serializable
 
     public function uploadImg($rootPath){
         if (null === $this->img) {
-            echo 'No hay imagen';
             return;
         }
         $nameImg = $this->nick . '-image';
@@ -117,7 +116,7 @@ class User implements UserInterface, \Serializable
      *     min=4,
      *     max=15,
      *     minMessage="El nombre de usuario debe contener al menos 4 caracteres",
-     *     maxMessage="El nombre de usuario debe contener como máximo caracteres"
+     *     maxMessage="El nombre de usuario debe contener como máximo 15 caracteres"
      * )
      */
     private $nick;
@@ -147,6 +146,16 @@ class User implements UserInterface, \Serializable
 
     /**
      * @Assert\Length(max=4096)
+     * @Assert\Regex(
+     *     pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/",
+     *     message="La contraseña debe tener al menos una mayúscula, una minúscula y un número"
+     * )
+     * @Assert\Length(
+     *     min=6,
+     *     max=20,
+     *     minMessage="La contraseña debe contener al menos 6 caracteres",
+     *     maxMessage="La contraseña debe contener como máximo 20 caracteres"
+     * )
      */
     private $plainPassword;
 

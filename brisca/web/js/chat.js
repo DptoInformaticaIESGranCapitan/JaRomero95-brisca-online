@@ -4,7 +4,9 @@
         $messages = $('#messages');
 //                    $action1 = $('#action1');
 
-    socket.emit('join', name);
+    $(window).load(function(){
+        socket.emit('join', name);
+    });
 
     $('#chat').submit(function () {
         var val = $m.val();

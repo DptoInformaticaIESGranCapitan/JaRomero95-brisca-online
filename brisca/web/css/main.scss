@@ -119,3 +119,10 @@ footer.page-footer {
     margin: 2em 28%;
   }
 }
+
+// xxs
+@media (max-width: 400px) {
+  nav .brand-logo {
+    font-size: 1.7rem !important;
+  }
+}

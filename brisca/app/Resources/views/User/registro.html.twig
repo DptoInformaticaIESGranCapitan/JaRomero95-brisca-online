@@ -3,7 +3,8 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col s12 margin-bottom-l margin-top-l">
+            {# FIXME require true en plainpassword solo en esta vista #}
+            <div class="col s12 m8 offset-m2 l6 offset-l3 margin-bottom-l margin-top-l">
                 {{ form_start(form) }}
 
                 <p class="center">REGISTRO</p>
@@ -34,7 +35,7 @@
                 {% endif %}
 
                 {{ form_label(form.plainPassword.first) }}
-                {{ form_widget(form.plainPassword.first, {'attr': {'placeholder': 'Contraseña'}}) }}
+                {{ form_widget(form.plainPassword.first, {'attr': {'placeholder': 'Contraseña', 'required': 'required'}}) }}
                 {% set errors = form_errors(form.plainPassword.first) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
@@ -43,7 +44,7 @@
                 {% endif %}
 
                 {{ form_label(form.plainPassword.second) }}
-                {{ form_widget(form.plainPassword.second, {'attr': {'placeholder': 'Confirmar contraseña'}}) }}
+                {{ form_widget(form.plainPassword.second, {'attr': {'placeholder': 'Confirmar contraseña', 'required': 'required'}}) }}
                 {% set errors = form_errors(form.plainPassword.second) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">

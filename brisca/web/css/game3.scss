@@ -1,0 +1,125 @@
+$width: 300;
+$height: 480;
+$cardWidth: 58;
+$cardHeight: 84;
+
+#game-container{
+  background: greenyellow;
+  position: relative;
+  padding: 10px 0;
+  #over-game {
+    position: absolute;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    margin-top: -10px;
+
+    #search-game {
+      position: absolute;
+      top: 50%;
+      margin-top: -18px;
+      left: 50%;
+      margin-left: -88px;
+    }
+  }
+}
+
+#game {
+  background: green;
+  display: block;
+  margin: 0 auto;
+  width: $width + px;
+  height: $height + px;
+  position: relative;
+}
+
+.playerImg {
+  position: absolute;
+  width: 95px;
+  height: 95px;
+  border: 3px solid black;
+  left: 2px;
+}
+
+#oponnentImg {
+  top: 2px;
+}
+
+#iImg {
+  top: ($height - 95 - 2) + px;
+}
+
+.turn {
+  border-color: yellow;
+}
+
+.game-card {
+  background-repeat: no-repeat;
+  background-color: white;
+  width: $cardWidth + px;
+  height: $cardHeight + px;
+  background-size: 100% 100%;
+  padding: 3px;
+  border-radius: 5px;
+  background-origin: content-box;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.deck {
+  position: absolute;
+  left: ( 20 + $cardWidth / 4 ) + px;
+  top: ( $height / 2 - $cardWidth ) + px;
+  transform: rotate(90deg);
+}
+
+.player-cards{
+  position: absolute;
+
+  .game-card + .game-card {
+    margin-left: 8px;
+  }
+}
+
+#my-cards {
+  left: ( 104 ) + px;
+  top: ( $height - $cardHeight - 20 ) + px;
+}
+
+#oponnent-cards {
+  left: ( 104 ) + px;
+  top: ( 20 ) + px;
+}
+
+.play {
+  position: absolute;
+}
+
+#my-play {
+  left: ( 104 + 8 + $cardWidth ) + px;
+  top: ( $height - $cardHeight * 2 - 20 * 2 ) + px;
+}
+
+#oponnent-play {
+  left: ( 104 + 8 + $cardWidth ) + px;
+  top: ( $cardHeight + 20 * 2 ) + px;
+}
+
+#sample {
+  position: absolute;
+  left: ( 20 + $cardWidth / 4 ) + px;
+  top: ( $height / 2 ) + px;
+}
+
+.semi-transparent {
+  opacity: 0.6;
+}
+
+// pantalla dividida
+@media (min-width: 700px) {
+
+  #game-container {
+    width: 50%;
+  }
+}

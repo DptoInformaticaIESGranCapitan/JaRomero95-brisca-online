@@ -18,7 +18,11 @@ function sendGame(user) {
         var game = global.games[idGame];
         if (game) {
             game.sendLateGame(user.name);
+        } else {
+            console.log('no se ha podido recoger el juego');
         }
+    } else {
+        console.log('user.game no existe, no debería aparecer');
     }
 }
 
@@ -48,6 +52,8 @@ var listeners = function (io) {
                 user.socket = socket;
                 if (user.game) {
                     sendGame(user);
+                } else {
+                    console.log('El usuario ', user.name, ' existía pero no tiene partida en curso');
                 }
             } else {
                 // No existe, lo creo
@@ -103,21 +109,21 @@ var listeners = function (io) {
          * Gestiona la creación y búsqueda de partida
          */
         socket.on('search game', function () {
-            if (actual) {
-                if (actual.start) {
-                    console.log('La partida actual ha empezado, se crea una nueva: ' + actual.id);
-                    actual = new Game(io);
-                }
-            } else {
-                actual = new Game(io);
-                console.log('No hay partida, se crea la partida por primera vez: ' + actual.id);
-            }
-
             // se recoge el objeto usuario
             var user = global.getUserBySocket(socket);
             if (user) {
                 if (user.game) {
                     return;
+                }
+
+                if (actual) {
+                    if (actual.start) {
+                        console.log('La partida actual ha empezado, se crea una nueva: ' + actual.id);
+                        actual = new Game(io);
+                    }
+                } else {
+                    actual = new Game(io);
+                    console.log('No hay partida, se crea la partida por primera vez: ' + actual.id);
                 }
 
                 // se añade el jugador a la partida

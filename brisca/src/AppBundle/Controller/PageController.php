@@ -35,6 +35,6 @@ class PageController extends Controller
      */
     public function playAction()
     {
-        return $this->render('page/game.html.twig');
+        return $this->render('page/game3.html.twig');
     }
 }

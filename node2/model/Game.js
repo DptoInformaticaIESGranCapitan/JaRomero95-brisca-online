@@ -98,8 +98,14 @@ Game.prototype.addUser = function (user) {
     // FIXME no añadir dos veces al mismo jugador
     'use strict';
     if (this.numUsers < numPlayers) {
-        this.users[user.name] = user;
-        ++this.numUsers;
+        // solo añado si no existe ya en la partida
+        if(!this.users[user.name]){
+            // solo añado si no tiene ya una partida en curso
+            if(!user.game){
+                this.users[user.name] = user;
+                ++this.numUsers;
+            }
+        }
     }
     this.checkUsers();
 };
@@ -141,6 +147,8 @@ Game.prototype.sendLateGame = function (userName) {
         oponnent,
         j;
 
+    console.log('SendLateGame a ', userName);
+    
     // recorro todos los jugadores
     for (i = 0; i < this.players.length; ++i) {
         oponnent = this.players[i];
@@ -172,6 +180,8 @@ Game.prototype.sendLateGame = function (userName) {
 
     // envío la muestra
     this.notify(player.name, 'sample', this.sample);
+
+    this.notify(player.name, 'game', player.game);
 
     // envío el turno si existe este ahora
     if (this.state === this.states.playHand) {
@@ -215,6 +225,8 @@ Game.prototype.distribute = function () {
         }
     }
 
+    this.notifyAll('numCards', this.deck.cards.length);
+
     this.chrono.init(timeMargin);
 };
 
@@ -235,6 +247,7 @@ Game.prototype.distributeHand = function () {
             // Nombre, carta
             this.notify(player.name, 'card', card);
             this.notifyAll('oponnent card', player.name);
+            this.notify(player.name, 'numCards', this.deck.cards.length);
         }
 
         this.chrono.init(timeMargin);
