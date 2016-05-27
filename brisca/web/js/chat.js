@@ -21,7 +21,7 @@
         $messages.append($('<li>').html(
             '<strong>' + msg.user + ':</strong> ' + msg.msg
         ));
-        $messages.animate({ scrollTop: $messages.height() }, 1000);
+        $messages.scrollTop($messages.prop('scrollHeight'));
     });
 
     socket.on('new user', function (user) {

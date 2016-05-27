@@ -121,5 +121,14 @@ $cardHeight: 84;
 
   #game-container {
     width: 50%;
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  #chat-container {
+    height: (480 + 20) + px;
+    width: 50%;
+    display: inline-block;
+    vertical-align: top;
   }
 }

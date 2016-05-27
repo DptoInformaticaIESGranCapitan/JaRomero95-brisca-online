@@ -1,5 +1,6 @@
 // TODO mensajes modo dialogo para los sucesos en la partida
-// FIXME reiniciar buscar partida al acabar una partida
+// FIXME al reiniciar una partida, la muestra no se actualiza
+// FIXME el número de cartas restantes se queda a 1 en algunas ocasiones
 (function (window, undefined, $, socket, name) {
     'use strict';
     var $search = $('#search-game'),
@@ -51,6 +52,9 @@
         if (restCards < 1) {
             $sample.addClass('semi-transparent');
             $num.hide();
+        } else {
+            $num.show();
+            $sample.removeClass('semi-transparent');
         }
     }
 
@@ -356,7 +360,7 @@
             // aquí si la muestra no la he cambiado yo mismo
 
             // recojo cualquier carta bocaabajo de su contenedor
-            $elem = $('#oponnent-cards .card').eq(0);
+            $elem = $('#oponnent-cards .game-card').eq(0);
 
             // lo elimino de ese contenedor
             $elem.remove();

@@ -178,7 +178,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="row margin-bottom-none">
+    <div>
         <div id="game-container">
             <div id="over-game">
                 <button class="btn" id="search-game">Buscar partida</button>
@@ -258,9 +258,10 @@
                 <div>Turno de <span id="turn"></span></div>
                 <div id="scores"></div>
             </div>
-        </div>
+        </div><!--
 
-        <div id="chat-container">
+        --><div id="chat-container">
+            {% include 'includes/chat.html.twig' %}
         </div>
     </div>
 {% endblock %}

@@ -6,7 +6,7 @@ var numPlayers = 2,
     timeMargin = 2,
     timeTurn = 6000;
 
-// TODO si el usuario está desconectado de la partida, tirar automáticamente!
+// TODO comprobar qué ocurre si el mismo jugador se conecta desde dos sitios (debería jugar el último conectado solo)
 function Game(io) {
     'use strict';
 
@@ -247,7 +247,6 @@ Game.prototype.distributeHand = function () {
             // Nombre, carta
             this.notify(player.name, 'card', card);
             this.notifyAll('oponnent card', player.name);
-            this.notify(player.name, 'numCards', this.deck.cards.length);
         }
 
         this.chrono.init(timeMargin);
@@ -255,6 +254,9 @@ Game.prototype.distributeHand = function () {
         // si no reparto cartas, espero menos tiempo para pasar a la siguiente acción
         this.chrono.init(1);
     }
+
+    // envía las cartas restantes
+    this.notifyAll('numCards', this.deck.cards.length);
 };
 
 /**
