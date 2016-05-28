@@ -4,6 +4,7 @@ $cardWidth: 58;
 $cardHeight: 84;
 
 #game-container{
+  margin-top: -10px;
   background: greenyellow;
   position: relative;
   padding: 10px 0;
@@ -116,19 +117,18 @@ $cardHeight: 84;
   opacity: 0.6;
 }
 
-// pantalla dividida
-@media (min-width: 700px) {
+#chat-container {
+  position: relative;
+  height: 500px;
+}
 
-  #game-container {
-    width: 50%;
-    display: inline-block;
-    vertical-align: top;
-  }
+#modal1 .modal-content{
+  height: 400px;
+}
 
-  #chat-container {
-    height: (480 + 20) + px;
-    width: 50%;
-    display: inline-block;
-    vertical-align: top;
+// entre móvil y tablet
+@media (min-width: 600px) {
+  #game-container{
+    margin-top: 0px;
   }
 }

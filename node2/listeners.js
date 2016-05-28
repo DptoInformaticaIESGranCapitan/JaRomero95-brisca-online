@@ -26,6 +26,22 @@ function sendGame(user) {
     }
 }
 
+function sendMsgGame(user, msg) {
+    'use strict';
+    var idGame = user.game;
+    if (idGame) {
+        var game = global.games[idGame];
+        if (game) {
+            console.log('se intenta mandar');
+            game.sendMsgGame(user, msg);
+        } else {
+            console.log('chat - no se ha podido recoger el juego');
+        }
+    } else {
+        console.log('chat - user.game no existe, no debería aparecer');
+    }
+}
+
 
 /**
  * Última partida que se está completando
@@ -103,6 +119,14 @@ var listeners = function (io) {
                 }
             );
             console.log('Nuevo mensaje => ' + user.name + ': ' + msg);
+        });
+
+        /**
+         * Gestiona la llegada de un nuevo mensaje a una partida
+         */
+        socket.on('msg-game', function (msg) {
+            var user = global.getUserBySocket(socket);
+            sendMsgGame(user, msg);
         });
 
         /**

@@ -294,7 +294,7 @@ Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
 };
 
 /**
- * Notifica un evento a todos los jugadores de la partida
+ * Notifica un evento a todos los usuarios de la partida
  * @param event {string} nombre del evento
  * @param data1
  * @param data2
@@ -303,9 +303,12 @@ Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
  */
 Game.prototype.notifyAll = function (event, data1, data2, data3, data4) {
     'use strict';
-    for (var i = 0; i < this.players.length; i++) {
-        var player = this.players[i];
-        global.users[player.name].socket.emit(event, data1, data2, data3, data4);
+
+    var user, users = this.users;
+    for (user in users) {
+        if (users.hasOwnProperty(user)) {
+            users[user].socket.emit(event, data1, data2, data3, data4);
+        }
     }
 };
 
@@ -858,7 +861,7 @@ Game.prototype.removeUsersGame = function() {
     for (i = 0; i < this.players.length; i++) {
         player = this.players[i];
         user = this.users[player.name];
-        
+
         if(user){
             user.game = undefined;
         }else {
@@ -866,6 +869,11 @@ Game.prototype.removeUsersGame = function() {
         }
 
     }
+};
+
+Game.prototype.sendMsgGame = function(user, msg) {
+    console.log('ha llegado aquí');
+    this.notifyAll('msg-game', user.name, msg)
 };
 
 module.exports = Game;

@@ -175,11 +175,59 @@
 {% block scripts %}
     {{ parent() }}
     <script src="{{ asset('js/game3.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            $('.modal-trigger').leanModal();
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
-    <div>
-        <div id="game-container">
+
+    {#chat modal: replicar para cambiar los id#}
+    <div id="modal1" class="modal">
+        <div>
+            <button class="modal-close btn-flat right">X</button>
+        </div>
+        <div class="modal-content">
+            <div class="chat-box">
+                <div class="col s12">
+                    <ul id="tabs2" class="tabs">
+                        <li id="tab-chat-general2" class="tab"><a class="active" href="#c-general2">General</a></li>
+                        <li id="tab-chat-game2" class="tab"><a href="#c-game2">Partida</a></li>
+                    </ul>
+                </div>
+                <div id="c-general2" class="msgs-container col s12">
+                    <ul class="messages msgs"></ul>
+                    <form id="chat2" class="chat">
+                        <div class="margin-bottom-none center">
+                            <input id="m2" type="text" autocomplete="off" placeholder="Mensaje"
+                                   class="margin-bottom-none margin-right-m">
+                            <button class="btn-floating" type="submit">
+                                <i class="material-icons">send</i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="c-game2" class="msgs-container col s12">
+                    <ul class="messages msgs-game"></ul>
+                    <form id="chat-game2" class="chat">
+                        <div class="margin-bottom-none center">
+                            <input id="m-game2" type="text" autocomplete="off" placeholder="Mensaje"
+                                   class="margin-bottom-none margin-right-m">
+                            <button class="btn-floating" type="submit">
+                                <i class="material-icons">send</i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row margin-bottom-none">
+        <div id="game-container" class="col s12 m7">
             <div id="over-game">
                 <button class="btn" id="search-game">Buscar partida</button>
             </div>
@@ -258,9 +306,9 @@
                 <div>Turno de <span id="turn"></span></div>
                 <div id="scores"></div>
             </div>
-        </div><!--
+        </div>
 
-        --><div id="chat-container">
+        <div id="chat-container" class="col m5 hide-on-small-only">
             {% include 'includes/chat.html.twig' %}
         </div>
     </div>

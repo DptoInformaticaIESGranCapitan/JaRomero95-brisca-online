@@ -18,6 +18,12 @@
         $num = $('#num'),
         $iImg = $('#iImg'),
         $oponnentImg = $('#oponnentImg'),
+        $tabChatGame = $('#tab-chat-game'),
+        $tabChatGame2 = $('#tab-chat-game2'),
+        $tabs = $('#tabs'),
+        $tabs2 = $('#tabs2'),
+        $modalTrigger = $('#trigger'),
+        oneTime = true,
         restCards = 40;
 
     function initChrono(finishTime) {
@@ -147,6 +153,24 @@
     }
 
     /**
+     * acciona la pestaña del chat la primera vez que
+     * se abre( solo el del diálogo)
+     */
+    $modalTrigger.click(function () {
+        if (oneTime) {
+            setTimeout(function () {
+                if ($tabChatGame.hasClass('disabled')) {
+                    $tabs2.tabs('select_tab', 'c-general2');
+                } else {
+                    $tabs2.tabs('select_tab', 'c-game2');
+                }
+
+                oneTime = false;
+            }, 100);
+        }
+    });
+
+    /**
      * Envía al servidor la carta sobre la que se ha clickado
      */
     $myCards.click(".cards", function (ev) {
@@ -230,6 +254,14 @@
     socket.on('game', function (idGame) {
         $search.prop('disabled', true);
         $overGame.fadeOut();
+
+        $tabChatGame.removeClass('disabled');
+        $tabs.tabs('select_tab', 'c-game');
+
+        $tabChatGame2.removeClass('disabled');
+        $tabs2.tabs('select_tab', 'c-game2');
+
+
         console.log('Te has unido a la sala: ' + idGame);
     });
 
@@ -404,6 +436,7 @@
 
         $overGame.fadeIn();
         $search.prop('disabled', false);
+        $tabChatGame.addClass('disabled');
     });
 
     socket.on('scores', function (players) {

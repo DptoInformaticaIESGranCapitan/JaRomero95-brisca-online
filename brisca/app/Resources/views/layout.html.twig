@@ -16,7 +16,12 @@
                 </a>
                 {% if user %}
                     <ul id="nav-mobile" class="right">
-                        <li class="{% if currentPath == path('play') %}active{% endif %}">
+                        <li class="hide-on-small-only {% if currentPath == path('homepage') %}active{% endif %}">
+                            <a href="/">
+                                Inicio
+                            </a>
+                        </li>
+                        <li class="hide-on-small-only {% if currentPath == path('play') %}active{% endif %}">
                             <a href="/jugar">
                                 Jugar
                             </a>
@@ -24,12 +29,14 @@
                         <li>
                             <a class="dropdown-button" href="#" data-activates="dropdown1">
                                 <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="user-img">
-                                <span class="hide-on-small-only margin-right-m"></span>
-                                <span class="hide-on-small-only">{{ user.nick }}</span>
+                                <span class="margin-right-m"></span>
+                                {{ user.nick }}
+                                {#<span class="hide-on-small-only">{{ user.nick }}</span>#}
                             </a>
                         </li>
                         <li class="hide-on-med-and-up">
-                            <a href="#">
+                            {#<!-- Modal Trigger -->#}
+                            <a id="trigger" href="#modal1" data-target="modal1" class="modal-trigger">
                                 <i class="material-icons">textsms</i>
                             </a>
                         </li>
