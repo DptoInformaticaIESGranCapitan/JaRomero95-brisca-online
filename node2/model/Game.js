@@ -4,7 +4,7 @@ var Deck = require('./Deck.js');//recibo el constructor
 
 var numPlayers = 2,
     timeMargin = 2,
-    timeTurn = 6000;
+    timeTurn = 59;
 
 // TODO comprobar qué ocurre si el mismo jugador se conecta desde dos sitios (debería jugar el último conectado solo)
 function Game(io) {

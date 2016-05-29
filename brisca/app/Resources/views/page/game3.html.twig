@@ -4,6 +4,9 @@
     {{ parent() }}
 
     <link rel="stylesheet" href="{{ asset('css/game3.css') }}">
+
+    <link href='https://fonts.googleapis.com/css?family=Rye' rel='stylesheet' type='text/css'>
+
     {# css en <style> para acceder a asset() #}
     <style>
         .game-card {
@@ -289,9 +292,13 @@
                 <div id="oponnent-play" class="play">
                 </div>
 
+                <div id="chrono-shadow" class="chrono">00</div>
+                <div id="chrono" class="chrono">00</div>
+
                 <div id="suit">
                     <div id="sample" class="game-card"></div>
-                    <div class="game-card deck" id="num"></div>
+                    <div class="game-card" id="deck"></div>
+                    <div id="num"></div>
                 </div>
 
                 <div id="my-play" class="play">

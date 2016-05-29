@@ -1,16 +1,16 @@
 function Deck() {
     'use strict';
     this.cards = [
-        //{id: 1, suit: this.suits.espadas, num: this.nums.n1},
-        //{id: 2, suit: this.suits.espadas, num: this.nums.n2},
-        //{id: 3, suit: this.suits.espadas, num: this.nums.n3},
-        //{id: 4, suit: this.suits.espadas, num: this.nums.n4},
-        //{id: 5, suit: this.suits.espadas, num: this.nums.n5},
-        //{id: 6, suit: this.suits.espadas, num: this.nums.n6},
-        //{id: 7, suit: this.suits.espadas, num: this.nums.n7},
-        //{id: 8, suit: this.suits.espadas, num: this.nums.n8},
-        //{id: 9, suit: this.suits.espadas, num: this.nums.n9},
-        //{id: 10, suit: this.suits.espadas, num: this.nums.n10},
+        {id: 1, suit: this.suits.espadas, num: this.nums.n1},
+        {id: 2, suit: this.suits.espadas, num: this.nums.n2},
+        {id: 3, suit: this.suits.espadas, num: this.nums.n3},
+        {id: 4, suit: this.suits.espadas, num: this.nums.n4},
+        {id: 5, suit: this.suits.espadas, num: this.nums.n5},
+        {id: 6, suit: this.suits.espadas, num: this.nums.n6},
+        {id: 7, suit: this.suits.espadas, num: this.nums.n7},
+        {id: 8, suit: this.suits.espadas, num: this.nums.n8},
+        {id: 9, suit: this.suits.espadas, num: this.nums.n9},
+        {id: 10, suit: this.suits.espadas, num: this.nums.n10},
 
         {id: 11, suit: this.suits.bastos, num: this.nums.n1},
         {id: 12, suit: this.suits.bastos, num: this.nums.n2},
@@ -21,29 +21,29 @@ function Deck() {
         {id: 17, suit: this.suits.bastos, num: this.nums.n7},
         {id: 18, suit: this.suits.bastos, num: this.nums.n8},
         {id: 19, suit: this.suits.bastos, num: this.nums.n9},
-        {id: 20, suit: this.suits.bastos, num: this.nums.n10}
+        {id: 20, suit: this.suits.bastos, num: this.nums.n10},
 
-        //{id: 21, suit: this.suits.oros, num: this.nums.n1},
-        //{id: 22, suit: this.suits.oros, num: this.nums.n2},
-        //{id: 23, suit: this.suits.oros, num: this.nums.n3},
-        //{id: 24, suit: this.suits.oros, num: this.nums.n4},
-        //{id: 25, suit: this.suits.oros, num: this.nums.n5},
-        //{id: 26, suit: this.suits.oros, num: this.nums.n6},
-        //{id: 27, suit: this.suits.oros, num: this.nums.n7},
-        //{id: 28, suit: this.suits.oros, num: this.nums.n8},
-        //{id: 29, suit: this.suits.oros, num: this.nums.n9},
-        //{id: 30, suit: this.suits.oros, num: this.nums.n10},
-        //
-        //{id: 31, suit: this.suits.copas, num: this.nums.n1},
-        //{id: 32, suit: this.suits.copas, num: this.nums.n2},
-        //{id: 33, suit: this.suits.copas, num: this.nums.n3},
-        //{id: 34, suit: this.suits.copas, num: this.nums.n4},
-        //{id: 35, suit: this.suits.copas, num: this.nums.n5},
-        //{id: 36, suit: this.suits.copas, num: this.nums.n6},
-        //{id: 37, suit: this.suits.copas, num: this.nums.n7},
-        //{id: 38, suit: this.suits.copas, num: this.nums.n8},
-        //{id: 39, suit: this.suits.copas, num: this.nums.n9},
-        //{id: 40, suit: this.suits.copas, num: this.nums.n10}
+        {id: 21, suit: this.suits.oros, num: this.nums.n1},
+        {id: 22, suit: this.suits.oros, num: this.nums.n2},
+        {id: 23, suit: this.suits.oros, num: this.nums.n3},
+        {id: 24, suit: this.suits.oros, num: this.nums.n4},
+        {id: 25, suit: this.suits.oros, num: this.nums.n5},
+        {id: 26, suit: this.suits.oros, num: this.nums.n6},
+        {id: 27, suit: this.suits.oros, num: this.nums.n7},
+        {id: 28, suit: this.suits.oros, num: this.nums.n8},
+        {id: 29, suit: this.suits.oros, num: this.nums.n9},
+        {id: 30, suit: this.suits.oros, num: this.nums.n10},
+
+        {id: 31, suit: this.suits.copas, num: this.nums.n1},
+        {id: 32, suit: this.suits.copas, num: this.nums.n2},
+        {id: 33, suit: this.suits.copas, num: this.nums.n3},
+        {id: 34, suit: this.suits.copas, num: this.nums.n4},
+        {id: 35, suit: this.suits.copas, num: this.nums.n5},
+        {id: 36, suit: this.suits.copas, num: this.nums.n6},
+        {id: 37, suit: this.suits.copas, num: this.nums.n7},
+        {id: 38, suit: this.suits.copas, num: this.nums.n8},
+        {id: 39, suit: this.suits.copas, num: this.nums.n9},
+        {id: 40, suit: this.suits.copas, num: this.nums.n10}
     ];
 
     // hay que barajar bien ;D

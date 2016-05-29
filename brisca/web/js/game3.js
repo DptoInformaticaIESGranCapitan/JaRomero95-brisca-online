@@ -13,9 +13,11 @@
         chronoInterval,
         chronoFinish,
         $chrono = $('#chrono'),
+        $chronoShadow = $('#chrono-shadow'),
         $scores = $('#scores'),
         $turn = $('#turn'),
         $num = $('#num'),
+        $deck = $('#deck'),
         $iImg = $('#iImg'),
         $oponnentImg = $('#oponnentImg'),
         $tabChatGame = $('#tab-chat-game'),
@@ -25,6 +27,14 @@
         $modalTrigger = $('#trigger'),
         oneTime = true,
         restCards = 40;
+
+    function resetGame() {
+        $sample.removeClass();
+        $sample.addClass('game-card');
+        $overGame.fadeIn();
+        $search.prop('disabled', false);
+        $tabChatGame.addClass('disabled');
+    }
 
     function initChrono(finishTime) {
         chronoFinish = finishTime;
@@ -40,6 +50,7 @@
             var actual = new Date().getTime(),
                 timeRest = (chronoFinish - actual) / 1000;
             $chrono.text(timeRest.toFixed(0));
+            $chronoShadow.text(timeRest.toFixed(0));
 
             if (actual > chronoFinish) {
                 finishChrono();
@@ -49,17 +60,24 @@
 
     function finishChrono() {
         clearInterval(chronoInterval);
-        $chrono.text('No hay crono');
+        $chrono.text('--');
+        $chronoShadow.text('--');
     }
 
     function updateNum() {
+        var right, bottom;
+
         $num.text(restCards);
+
+        right = Math.ceil(restCards * 0.25);
+        bottom = Math.ceil(restCards * 0.25);
+        $deck.css('box-shadow', right + 'px -' + bottom + 'px ' + '18px black');
 
         if (restCards < 1) {
             $sample.addClass('semi-transparent');
-            $num.hide();
+            $deck.hide();
         } else {
-            $num.show();
+            $deck.show();
             $sample.removeClass('semi-transparent');
         }
     }
@@ -434,9 +452,7 @@
         } else
             console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
 
-        $overGame.fadeIn();
-        $search.prop('disabled', false);
-        $tabChatGame.addClass('disabled');
+        resetGame();
     });
 
     socket.on('scores', function (players) {

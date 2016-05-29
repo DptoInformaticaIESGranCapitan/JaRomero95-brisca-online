@@ -2,6 +2,22 @@ body, html {
   min-width: 320px;
 }
 
+#modal1, #chat-container, #index-chat-container {
+  background-color: greenyellow;
+}
+
+.chat-msg {
+  width: 75%;
+  padding: 8px;
+  background-color: white;
+  border-radius: 10px;
+  margin: 3px 2%;
+}
+
+.tabs {
+  overflow: hidden !important;
+}
+
 .container-in-slider {
   position: absolute;
   z-index: 100;
@@ -17,7 +33,7 @@ body, html {
   width: 100%;
   height: 100%;
   position: relative;
-  padding: 20px 5% 70px 5%;
+  padding: 20px 0 70px 0;
 
   .msgs-container {
 
@@ -35,6 +51,7 @@ body, html {
     .chat {
       position: absolute;
       bottom: 15px;
+      left: 5%;
       width: 90%;
 
       input {
@@ -52,7 +69,8 @@ body, html {
   width: 50px;
   height: 40px;
   vertical-align: middle;
-  border: 1px solid black;
+  border: 2px solid black;
+  background-color: white;
   border-radius: 5px;
 }
 

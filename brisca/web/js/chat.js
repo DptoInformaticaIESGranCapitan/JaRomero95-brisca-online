@@ -6,16 +6,25 @@
         $mGame2 = $('#m-game2'),
         $msgs = $('.msgs'),
         $msgsGame = $('.msgs-game'),
-        $modal =  $('#modal1'),
-        $tabChatGame =  $('#tab-chat-game'),
-        $tabChatGame2 =  $('#tab-chat-game2'),
-        $trigger =  $('#trigger');
+        $modal = $('#modal1'),
+        $tabChatGame = $('#tab-chat-game'),
+        $tabChatGame2 = $('#tab-chat-game2'),
+        $trigger = $('#trigger');
 //                    $action1 = $('#action1');
 
     $tabChatGame.addClass('disabled');
     $tabChatGame2.addClass('disabled');
 
-    $(window).load(function() {
+    function getChatMsg(username, msg) {
+        var float = (username === name) ? 'right' : '';
+        return '<div class="chat-msg ' + float + '">' +
+            '<span class="msg-name"><strong>' + username + '</strong></span><br/>' +
+            '<span class="msg-msg">' + msg + '</span>' +
+            '</div>' +
+            '<div style="clear: both"></div>';
+    }
+
+    $(window).load(function () {
         socket.emit('join', name);
     });
 
@@ -58,11 +67,11 @@
         }
         return false;
     });
-
+// FIXME borrar mensajes si hay más de x = 100
     // Recibir mensaje chat general tanto derecha como dialogo
     socket.on('msg', function (msg) {
         $msgs.append($('<li>').html(
-            '<strong>' + msg.user + ':</strong> ' + msg.msg
+            getChatMsg(msg.user, msg.msg)
         ));
 
         // se hace scroll
@@ -78,11 +87,11 @@
     socket.on('msg-game', function (username, msg) {
         console.log('se ha emitido este evento');
         $msgsGame.append($('<li>').html(
-            '<strong>' + username + ':</strong> ' + msg
+            getChatMsg(username, msg)
         ));
 
         // se hace scroll
-        $msgsGame.scrollTop($msgs.prop('scrollHeight'));
+        $msgsGame.scrollTop($msgsGame.prop('scrollHeight'));
 
         // se hace scroll para el otro chat si lo hay
         if ($msgsGame.size() > 1) {
@@ -96,7 +105,7 @@
     });
 
     // limpiar blink al abrir el chat dialogo
-    $trigger.click(function() {
+    $trigger.click(function () {
         $trigger.removeClass('blink');
     });
 
