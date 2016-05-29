@@ -1,10 +1,10 @@
 var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
-
+// FIXME la meustra se reparte antes que la penúltima carta?
 var numPlayers = 2,
     timeMargin = 2,
-    timeTurn = 59;
+    timeTurn = 20;
 
 // TODO comprobar qué ocurre si el mismo jugador se conecta desde dos sitios (debería jugar el último conectado solo)
 function Game(io) {
@@ -99,9 +99,9 @@ Game.prototype.addUser = function (user) {
     'use strict';
     if (this.numUsers < numPlayers) {
         // solo añado si no existe ya en la partida
-        if(!this.users[user.name]){
+        if (!this.users[user.name]) {
             // solo añado si no tiene ya una partida en curso
-            if(!user.game){
+            if (!user.game) {
                 this.users[user.name] = user;
                 ++this.numUsers;
             }
@@ -132,7 +132,7 @@ Game.prototype.init = function () {
     var user, users = this.users;
     for (user in users) {
         if (users.hasOwnProperty(user)) {
-            this.players.push(new Player(users[user].name));
+            this.players.push(new Player(users[user].name, users[user].img));
         }
     }
     this.sendInitInfo();
@@ -148,7 +148,7 @@ Game.prototype.sendLateGame = function (userName) {
         j;
 
     console.log('SendLateGame a ', userName);
-    
+
     // recorro todos los jugadores
     for (i = 0; i < this.players.length; ++i) {
         oponnent = this.players[i];
@@ -158,17 +158,17 @@ Game.prototype.sendLateGame = function (userName) {
             card = oponnent.cards[j];
 
             // Si el jugador es el mismo que el que se ha conectado, envío sus cartas
-            if (oponnent === player){
+            if (oponnent === player) {
                 this.notify(player.name, 'card', card);
                 console.log('envío carta a ', player.name);
             }
-            else{
+            else {
                 this.notify(player.name, 'oponnent card', oponnent.name);
                 console.log('envío carta oponente a ', player.name);
             }
 
             // envío cartas jugadas si las hay
-            if(oponnent.cardPlayed){
+            if (oponnent.cardPlayed) {
                 console.log('envío carta jugada por ', oponnent.name, ' a ', player.name);
                 this.notify(player.name, 'latePlayed', oponnent.name, oponnent.cardPlayed);
             }
@@ -183,6 +183,12 @@ Game.prototype.sendLateGame = function (userName) {
 
     this.notify(player.name, 'game', player.game);
 
+    if (player.name === this.players[1].name) {
+        this.notify(this.players[1].name, 'oponnent', this.players[0].name, this.players[0].img);
+    } else {
+        this.notify(this.players[0].name, 'oponnent', this.players[1].name, this.players[1].img);
+    }
+
     // envío el turno si existe este ahora
     if (this.state === this.states.playHand) {
         this.notify(player.name, 'turn', this.players[this.turn].name, this.chrono.finishTime);
@@ -196,7 +202,9 @@ Game.prototype.sendLateGame = function (userName) {
 Game.prototype.sendInitInfo = function () {
     'use strict';
     console.log('Comienza la partida: ' + this.id);
-    this.notifyAll('begin', this.players);
+    this.notifyAll('begin');
+    this.notify(this.players[0].name, 'oponnent', this.players[1].name, this.players[1].img);
+    this.notify(this.players[1].name, 'oponnent', this.players[0].name, this.players[0].img);
     //this.setTurn();
     this.distribute();
 };
@@ -228,6 +236,8 @@ Game.prototype.distribute = function () {
     this.notifyAll('numCards', this.deck.cards.length);
 
     this.chrono.init(timeMargin);
+
+    console.log(this.deck.cards);
 };
 
 /**
@@ -235,13 +245,26 @@ Game.prototype.distribute = function () {
  */
 Game.prototype.distributeHand = function () {
     'use strict';
+
+    console.log(this.deck.cards);
+
     if (this.hasCards()) {
-        var i, player, card;
+        var i,
+            player,
+            card,
+            card1 = this.deck.cards.pop(),
+            card2 = this.deck.cards.pop();
 
         for (i = 0; i < this.players.length; ++i) {
             player = this.players[i];
-            // a cada jugador, le reparto y ENVÍO 1 carta
-            card = this.deck.cards.pop();
+
+            if (player === this.players[this.turn]) {
+                card = card1;
+            } else {
+                card = card2;
+            }
+
+            // añado la carta a su mano
             player.cards.push(card);
 
             // Nombre, carta
@@ -331,7 +354,7 @@ Game.prototype.states = {
  */
 Game.prototype.handlerState = function () {
     'use strict';
-    switch (this.state){
+    switch (this.state) {
         case this.states.wait:
             // En este no se debería encontrar nunca, aquí no hay ninguna espera
             break;
@@ -351,13 +374,13 @@ Game.prototype.handlerState = function () {
             this.playHand();
 
             // Compruebo si el turno ha vuelto al jugador que ha iniciado la mano
-            if(this.turn === this.firstTurn){
+            if (this.turn === this.firstTurn) {
                 // establezco el estado de la partida a: comprobando mano
                 this.state = this.states.checkHand;
 
                 // Espero el margen antes de entrar en comprobar mano
                 this.chrono.init(timeMargin);
-            }else{
+            } else {
                 // La mano aún no ha terminado, notifico el próximo turno
                 this.sendTurn();
             }
@@ -381,7 +404,7 @@ Game.prototype.handlerState = function () {
         case this.states.sendTurn:
 
             // Primero compruebo si hay suficientes cartas para todos los jugadores. Si no es el caso, la partida habría terminado.
-            if ( this.isEnd() ){
+            if (this.isEnd()) {
                 // La partida ha terminado
                 this.checkWinner();
 
@@ -400,14 +423,17 @@ Game.prototype.handlerState = function () {
             this.state = this.states.playHand;
             break;
         case this.states.finish:
-            // Solo queda anunciar al ganador o ganadores, pero solo se debe enviar el nombre
-            var i, winner, winnerNames = [];
-            for (i = 0; i < this.winners.length; i++ ) {
-                winner = this.winners[i];
-                winnerNames.push(winner.name);
+            // Solo queda anunciar la puntuación final
+            var i, player, players = [];
+            for (i = 0; i < this.winners.length; i++) {
+                player = this.winners[i];
+                players.push({
+                    name: player.name,
+                    score: player.score
+                });
             }
 
-            this.notifyAll('winners', winnerNames);
+            this.notifyAll('final', players);
 
             this.removeUsersGame();
 
@@ -419,7 +445,7 @@ Game.prototype.handlerState = function () {
 /**
  * Establece el ganador (o ganadores, en caso de empate) de la partida
  */
-Game.prototype.checkWinner = function() {
+Game.prototype.checkWinner = function () {
     // Comparo la puntuación de cada jugador
 
     // Ganadores ( array porque puede ser empate, varios ganadores )
@@ -429,10 +455,10 @@ Game.prototype.checkWinner = function() {
 
     for (i = 1; i < this.players.length; i++) {
         player = this.players[i];
-        if(player.score > winners[0].score){
+        if (player.score > winners[0].score) {
             // reasigno porque debo eliminar a todos los jugadores que estuvieran empatados para añadir al campeón
             winners = [player];
-        }else if (player.score === winners[0].score) {
+        } else if (player.score === winners[0].score) {
             // lo añado al array de vencedores porque van empate
             winners.push(player);
         }
@@ -447,7 +473,7 @@ Game.prototype.checkWinner = function() {
  * Gestiona el estado de jugar una mano de la partida. Va dentro de handlerState,
  * pero se ha extraído para limpiar el código
  */
-Game.prototype.playHand = function() {
+Game.prototype.playHand = function () {
     //primero, compruebo si el usuario del turno actual, ha jugado la mano que le corresponde
 
     // recojo el player
@@ -455,16 +481,16 @@ Game.prototype.playHand = function() {
         card;
 
     // compruebo si ha tirado
-    if(!player.cardPlayed){
+    if (!player.cardPlayed) {
         // no ha tirado
 
         // lanzamiento automático
         card = player.playCard();
 
-        if ( card ) {
+        if (card) {
             // Notifico a todos la carta que ha jugado el usuario
             this.notifyAll('played', player.name, card);
-        }else {
+        } else {
             console.log('No ha jugado carta, no debería suceder');
         }
     }
@@ -476,9 +502,9 @@ Game.prototype.playHand = function() {
 /**
  * Cambio el turno al siguiente jugador en el array
  */
-Game.prototype.nextTurn = function(){
+Game.prototype.nextTurn = function () {
     'use strict';
-    if(this.turn < this.players.length-1)
+    if (this.turn < this.players.length - 1)
         ++this.turn;
     else
         this.turn = 0;
@@ -487,14 +513,14 @@ Game.prototype.nextTurn = function(){
 /**
  * Comprueba el ganador de una mano cuando esta ha finalizado
  */
-Game.prototype.checkHand = function(){
+Game.prototype.checkHand = function () {
     'use strict';
     var samples = [], i, player, winner;
 
     // Compruebo si hay jugadores que han jugado cartas del palo de muestra
     for (i = 0; i < this.players.length; i++) {
         player = this.players[i];
-        if(player.cardPlayed.suit === this.sample.suit){
+        if (player.cardPlayed.suit === this.sample.suit) {
             samples.push(player);
             //console.log(player.name + ' ha jugado muestra: ' + player.cardPlayed);
         }
@@ -509,12 +535,12 @@ Game.prototype.checkHand = function(){
         // Se empieza a recorrer a partir del segundo jugador (preparado para más de 2)
         for (i = 1; i < samples.length; i++) {
             player = samples[i];
-            if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
+            if (winner.cardPlayed.num.value < player.cardPlayed.num.value) {
                 winner = player;
                 //console.log('Hay muestra mayor, el ganador va siendo: ', winner.name);
             }
         }
-    }else{
+    } else {
         // No se han jugado cartas de muestra, así que aún no hay ganador
 
         // La primera carta jugada es la ganadora actual
@@ -526,10 +552,10 @@ Game.prototype.checkHand = function(){
         for (i = 0; i < this.players.length; i++) {
             player = this.players[i];
             // Se comprueba que la carta sea del palo que se está jugando
-            if (player.cardPlayed.suit === winner.cardPlayed.suit){
+            if (player.cardPlayed.suit === winner.cardPlayed.suit) {
 
                 // Se compara la puntuación de ambas cartas
-                if(winner.cardPlayed.num.value < player.cardPlayed.num.value){
+                if (winner.cardPlayed.num.value < player.cardPlayed.num.value) {
                     winner = player;
                     //console.log('Hay mejor carta, el ganador va siendo: ', winner.name);
                 }
@@ -582,7 +608,7 @@ Game.prototype.sendTurn = function () {
             // como está desconectado, se tira en 1 seg
             this.chrono.init(1);
         }
-    }else{
+    } else {
         console.log('NO HAY USUARIO EN sendTurn');
     }
 
@@ -615,20 +641,20 @@ Game.prototype.play = function (userName, id) {
     var player = this.getPlayer(userName),
         card;
     if (player) {
-        if (this.hasTurn(player)){
-                card = player.playCard(id);
-                if ( card ) {
-                    // Notifico a todos la carta que ha jugado el usuario
-                    this.notifyAll('played', userName, card);
+        if (this.hasTurn(player)) {
+            card = player.playCard(id);
+            if (card) {
+                // Notifico a todos la carta que ha jugado el usuario
+                this.notifyAll('played', userName, card);
 
-                    //finalizo el cronómetro
-                    this.chrono.finish();
-                }
+                //finalizo el cronómetro
+                this.chrono.finish();
+            }
         }
     }
 };
 
-Game.prototype.hasTurn = function(player){
+Game.prototype.hasTurn = function (player) {
     if (player === this.players[this.turn]) {
         if (this.state === this.states.playHand) {
             return true;
@@ -638,104 +664,106 @@ Game.prototype.hasTurn = function(player){
     return false;
 };
 
-Game.prototype.tryChangeSample = function(userName, id){
+Game.prototype.tryChangeSample = function (userName, id) {
     'use strict';
     var player = this.getPlayer(userName),
         card,
         neccesaryCardId;
-    if (player) {
-        if (this.hasTurn(player)){
-            card = player.getCard(id);
+    if(this.deck.cards.length > 0) {
+        if (player) {
+            if (this.hasTurn(player)) {
+                card = player.getCard(id);
 
-            // existe la carta que el usuario quiere canjear
-            if ( card ) {
+                // existe la carta que el usuario quiere canjear
+                if (card) {
 
-                // AQUÍ el usuario tiene la carta enviada y tiene el turno
+                    // AQUÍ el usuario tiene la carta enviada y tiene el turno
 
-                if (this.sample.num.value > 5){
+                    if (this.sample.num.value > 5) {
 
-                    // en función del palo de muestra, busco la carta 7 en la baraja
-                    switch (this.sample.suit){
-                        case 'espadas':
-                            neccesaryCardId = 7;
-                            break;
-                        case 'bastos':
-                            neccesaryCardId = 17;
-                            break;
-                        case 'oros':
-                            neccesaryCardId = 27;
-                            break;
-                        case 'copas':
-                            neccesaryCardId = 37;
-                            break;
-                    }
-                } else{
-                    // compruebo que la muestra es mayor que la carta 2 => value: 1
-                    if (this.sample.num.value > 1){
-                        // en función del palo de muestra, busco la carta 2 en la baraja
-                        switch (this.sample.suit){
+                        // en función del palo de muestra, busco la carta 7 en la baraja
+                        switch (this.sample.suit) {
                             case 'espadas':
-                                neccesaryCardId = 2;
+                                neccesaryCardId = 7;
                                 break;
                             case 'bastos':
-                                neccesaryCardId = 12;
+                                neccesaryCardId = 17;
                                 break;
                             case 'oros':
-                                neccesaryCardId = 22;
+                                neccesaryCardId = 27;
                                 break;
                             case 'copas':
-                                neccesaryCardId = 32;
+                                neccesaryCardId = 37;
                                 break;
                         }
                     } else {
-                        console.log('La carta de muestra es el 2, esa no se puede cambiar');
-                        neccesaryCardId = undefined;
+                        // compruebo que la muestra es mayor que la carta 2 => value: 1
+                        if (this.sample.num.value > 1) {
+                            // en función del palo de muestra, busco la carta 2 en la baraja
+                            switch (this.sample.suit) {
+                                case 'espadas':
+                                    neccesaryCardId = 2;
+                                    break;
+                                case 'bastos':
+                                    neccesaryCardId = 12;
+                                    break;
+                                case 'oros':
+                                    neccesaryCardId = 22;
+                                    break;
+                                case 'copas':
+                                    neccesaryCardId = 32;
+                                    break;
+                            }
+                        } else {
+                            console.log('La carta de muestra es el 2, esa no se puede cambiar');
+                            neccesaryCardId = undefined;
+                        }
                     }
-                }
 
-                // si la carta de muesta no es 2, aquí ya se tiene la carta necesaria
-                if (neccesaryCardId){
-                    if (neccesaryCardId === id){
-                        this.changeSample(player, card);
+                    // si la carta de muesta no es 2, aquí ya se tiene la carta necesaria
+                    if (neccesaryCardId) {
+                        if (neccesaryCardId === id) {
+                            this.changeSample(player, card);
+                        }
                     }
-                }
 
+                } else {
+                    console.log('El player no tiene esa carta en la mano');
+                }
             } else {
-                console.log('El player no tiene esa carta en la mano');
+                console.log('el player no tiene el turno');
             }
         } else {
-            console.log('el player no tiene el turno');
+            console.log('el player no existe');
         }
-    } else {
-        console.log('el player no existe');
     }
 };
 
-Game.prototype.tryChangeSample2 = function(userName, id){
+Game.prototype.tryChangeSample2 = function (userName, id) {
     'use strict';
     var player = this.getPlayer(userName),
         card;
 
-    if (!this.hasCards()){
+    if (!this.hasCards()) {
         console.log('NO HAY CARTAS');
         return;
     }
 
     if (player) {
-        if (this.hasTurn(player)){
+        if (this.hasTurn(player)) {
             card = player.playCard(id);
 
             // existe la carta que el usuario quiere canjear
-            if ( card ) {
+            if (card) {
 
                 // compruebo si la carta es del mismo palo que la muestra
-                if(card.suit === this.sample.suit){
+                if (card.suit === this.sample.suit) {
 
                     // compruebo si la carta enviada es el 7 => value 5
-                    if(card.num.name === 'Siete'){
+                    if (card.num.name === 'Siete') {
 
                         // compruebo si la carta de muestra es mayor que el 7
-                        if(this.sample.num.value > card.num.value){
+                        if (this.sample.num.value > card.num.value) {
 
                             // aquí ya hago el cambio
                             this.changeSample(player, card);
@@ -747,7 +775,7 @@ Game.prototype.tryChangeSample2 = function(userName, id){
                     } else if (card.num.name === 'Dos') {
 
                         // compruebo si la carta de muestra es mayor que el 2 y menor que el 7 => value 5
-                        if(this.sample.num.value > card.num.value && this.sample.value < 5){
+                        if (this.sample.num.value > card.num.value && this.sample.value < 5) {
 
                             // aquí ya hago el cambio
                             this.changeSample(player, card);
@@ -771,7 +799,7 @@ Game.prototype.tryChangeSample2 = function(userName, id){
     }
 };
 
-Game.prototype.changeSample = function(player, card){
+Game.prototype.changeSample = function (player, card) {
     // almaceno la antigua muestra y la elimino de la baraja
     var oldSample = this.deck.cards.shift();
 
@@ -797,27 +825,27 @@ Game.prototype.changeSample = function(player, card){
  * de los jugadores mantiene cartas en sus manos.
  * @returns {boolean}
  */
-Game.prototype.isEnd = function() {
+Game.prototype.isEnd = function () {
     var player,
         i,
         emptyHands = true; // todos los jugadores sin cartas
 
     // Compruebo si ya no quedan cartas para repartir
-    if(!this.hasCards()){
+    if (!this.hasCards()) {
 
         // recorro los jugadores
         for (i = 0; i < this.players.length; i++) {
             player = this.players[i];
 
             // compruebo si al jugador le quedan cartas
-            if(player.cards.length > 0){
+            if (player.cards.length > 0) {
                 // como le quedan cartas a uno, aún sigue la partida
                 emptyHands = false;
             }
         }
 
         // si no le quedasen cartas a ninguno, la partida se habría acabado
-        if(emptyHands)
+        if (emptyHands)
             return true;
     }
 
@@ -828,30 +856,30 @@ Game.prototype.isEnd = function() {
  * Comprueba si hay suficientes cartas para repartir una mano a los jugadores
  * @returns {boolean}
  */
-Game.prototype.hasCards = function(){
+Game.prototype.hasCards = function () {
     return this.deck.cards.length >= this.players.length;
 };
 
-Game.prototype.automaticPlayCard = function(player){
+Game.prototype.automaticPlayCard = function (player) {
     'use strict';
     var card;
     // compruebo si ha tirado
-    if(!player.cardPlayed){
+    if (!player.cardPlayed) {
         // no ha tirado
 
         // lanzamiento automático
         card = player.playCard();
 
-        if ( card ) {
+        if (card) {
             // Notifico a todos la carta que ha jugado el usuario
             this.notifyAll('played', player.name, card);
-        }else {
+        } else {
             console.log('No ha jugado carta, no debería suceder');
         }
     }
 };
 
-Game.prototype.removeUsersGame = function() {
+Game.prototype.removeUsersGame = function () {
     var player, i, user;
     /**
      * Los usuarios son los mismos que los jugadores,
@@ -862,16 +890,16 @@ Game.prototype.removeUsersGame = function() {
         player = this.players[i];
         user = this.users[player.name];
 
-        if(user){
+        if (user) {
             user.game = undefined;
-        }else {
+        } else {
             console.log('¡¡!! esto no debería darse - Game.removeUsersGame');
         }
 
     }
 };
 
-Game.prototype.sendMsgGame = function(user, msg) {
+Game.prototype.sendMsgGame = function (user, msg) {
     console.log('ha llegado aquí');
     this.notifyAll('msg-game', user.name, msg)
 };

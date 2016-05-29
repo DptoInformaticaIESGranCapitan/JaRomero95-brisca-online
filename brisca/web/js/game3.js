@@ -1,6 +1,7 @@
 // TODO mensajes modo dialogo para los sucesos en la partida
 // FIXME al reiniciar una partida, la muestra no se actualiza
 // FIXME el número de cartas restantes se queda a 1 en algunas ocasiones
+// FIXME scroll al abrir el chat
 (function (window, undefined, $, socket, name) {
     'use strict';
     var $search = $('#search-game'),
@@ -18,22 +19,83 @@
         $turn = $('#turn'),
         $num = $('#num'),
         $deck = $('#deck'),
-        $iImg = $('#iImg'),
-        $oponnentImg = $('#oponnentImg'),
+        $iDiv = $('#iImg'),
+        $oponnentDiv = $('#oponnentImg'),
+        $oponnentImg = $('#oponnentImg img'),
+        $oponnentName = $('#oponnent-name'),
         $tabChatGame = $('#tab-chat-game'),
         $tabChatGame2 = $('#tab-chat-game2'),
         $tabs = $('#tabs'),
         $tabs2 = $('#tabs2'),
         $modalTrigger = $('#trigger'),
+        $gameAlert = $('#game-alert'),
+        $finish = $('#finish'),
+        $finishText = $('#finish-text'),
+        $finishOponnentImg = $('#finish-oponnent-img'),
+        $finishOponnentName = $('#finish-oponnent-name'),
+        $finishOponnentScore = $('#finish-oponnent-score'),
+        $finishMyScore = $('#finish-my-score'),
+        $imgW = $('#winner'),
+        $imgL = $('#loser'),
+        $imgD = $('#draw'),
         oneTime = true,
+        $oponnentOver = $('#oponnent-over'),
+        $myOver = $('#my-over'),
         restCards = 40;
 
     function resetGame() {
+
+        setTimeout(function () {
+            $oponnentName.text('');
+            $oponnentImg.attr('src', '/img/qmark.png');
+        });
+
         $sample.removeClass();
         $sample.addClass('game-card');
         $overGame.fadeIn();
         $search.prop('disabled', false);
         $tabChatGame.addClass('disabled');
+    }
+
+    function showAlert(msg) {
+        //// si se estaba mostrando, lo ocultamos
+        //$gameAlert.hide(0);
+        //$gameAlert.removeClass('doAnim');
+        //
+        //// añadimos el nuevo mensaje
+        //$gameAlert.html('<p>' + msg + '</p>');
+        //
+        //// lo mostramos, inicialmente no se ve porque está rotado
+        //$gameAlert.show(0)
+        //    // lo hacemos rotar y hacerse visible después de mostrarse
+        //    .addClass('doAnim',
+        //
+        //        // temporizador para ocultarse
+        //        setTimeout(function () {
+        //            // lo ocultamos
+        //            $gameAlert.fadeOut(800, function () {
+        //                // después de ocultarse eliminamos la clase para que vuelve a la posición inicial
+        //                $gameAlert.removeClass('doAnim');
+        //            })
+        //        }, 3000));
+    }
+
+    function showWinnerHand(winner){
+
+        if(winner === 0){
+            $oponnentOver.css('backgroundColor', 'rgba(255,0,0,0.6)');
+            $myOver.css('backgroundColor', 'rgba(0,255,0,0.6)');
+        }else {
+            $oponnentOver.css('backgroundColor', 'rgba(0,255,0,0.6)');
+            $myOver.css('backgroundColor', 'rgba(255,0,0,0.6)');
+        }
+
+        setTimeout(function(){
+            $oponnentOver.css('backgroundColor', 'transparent');
+            $myOver.css('backgroundColor', 'transparent');
+            $myPlay.html('');
+            $oponnentPlay.html('');
+        }, 1900);
     }
 
     function initChrono(finishTime) {
@@ -76,8 +138,10 @@
         if (restCards < 1) {
             $sample.addClass('semi-transparent');
             $deck.hide();
+            $num.hide();
         } else {
             $deck.show();
+            $num.show();
             $sample.removeClass('semi-transparent');
         }
     }
@@ -280,15 +344,23 @@
         $tabs2.tabs('select_tab', 'c-game2');
 
 
-        console.log('Te has unido a la sala: ' + idGame);
+        showAlert('Te has unido a una partida');
     });
 
     /**
      *  Notifica que ha empezado la partida
      *  */
-    socket.on('begin', function (data1, data2) {
+    socket.on('begin', function () {
+        showAlert('La partida va a comenzar');
         $search.prop('disabled', true);
-        console.log('¡Comienza la partida!', data1, data2);
+    });
+
+    socket.on('oponnent', function (username, img) {
+        $oponnentName.text(username);
+        $oponnentImg.attr('src', '/uploads/images/' + img);
+
+        $finishOponnentName.text(username);
+        $finishOponnentImg.attr('src', '/uploads/images/' + img);
     });
 
     /**
@@ -297,14 +369,16 @@
     socket.on('turn', function (playerName, time) {
         finishChrono();
 
-        $iImg.removeClass('turn');
-        $oponnentImg.removeClass('turn');
+        $iDiv.removeClass('turn');
+        $oponnentDiv.removeClass('turn');
 
         if (playerName === name) {
-            $iImg.addClass('turn');
+            $iDiv.addClass('turn');
+            showAlert('Tu turno');
         }
         else {
-            $oponnentImg.addClass('turn');
+            $oponnentDiv.addClass('turn');
+            showAlert('Turno del oponente');
         }
         initChrono(time);
     });
@@ -370,10 +444,10 @@
         console.log(playerName + ' ha jugado ', card);
         if (playerName === name) {
             onPlayCard(card);
-            $iImg.removeClass('turn');
+            $iDiv.removeClass('turn');
         } else {
             onOponnentPlayCard(card);
-            $oponnentImg.removeClass('turn');
+            $oponnentDiv.removeClass('turn');
         }
         finishChrono();
     });
@@ -409,6 +483,8 @@
         } else {
             // aquí si la muestra no la he cambiado yo mismo
 
+            showAlert('Tu oponente ha cambiado la muestra');
+
             // recojo cualquier carta bocaabajo de su contenedor
             $elem = $('#oponnent-cards .game-card').eq(0);
 
@@ -438,19 +514,86 @@
     });
 
     socket.on('winnerHand', function (playerName) {
-        $scores.append('<p><strong>' + playerName + ' ha ganado la mano</strong></p>');
+
+        /**
+         * 0 = me
+         * 1 = oponnent
+         * @type {number}
+         */
+        var winner;
+        if(playerName === name) {
+            winner = 0;
+        } else {
+            winner = 1;
+        }
         finishChrono();
-        $myPlay.html('');
-        $oponnentPlay.html('');
+
+        showWinnerHand(winner);
     });
 
-    socket.on('winners', function (winnersNames) {
-        if (winnersNames.length == 1)
-            alert(winnersNames[0] + ' ha ganado la partida');
-        else if (winnersNames.length > 0) {
-            alert('Han ganado la partida: ' + winnersNames.join(', '));
+    socket.on('final', function (players) {
+        var player1,
+            player2,
+            /**
+             * me = 0
+             * oponnent = 1
+             * draw = 2
+             */
+            winner;
+
+        $imgD.hide();
+        $imgL.hide();
+        $imgW.hide();
+
+        player1 = players[0];
+        player2 = players[1];
+
+        // establezco las puntuaciones en el dom
+        if(player1.name === name){
+            $finishMyScore.text(player1.score);
+            $finishOponnentScore.text(player2.score)
+
+            if(player1.score > player2.score){
+                winner = 0;
+            } else if (player1.score < player2.score) {
+                winner = 1;
+            } else {
+                winner = 2;
+            }
+
+        } else {
+            $finishMyScore.text(player2.score);
+            $finishOponnentScore.text(player1.score)
+
+            if(player1.score > player2.score){
+                winner = 1;
+            } else if (player1.score < player2.score) {
+                winner = 0;
+            } else {
+                winner = 2;
+            }
+        }
+
+
+
+
+        if (winners.length == 1){
+            var winner = winners[0];
+            if (winner.name === name){
+                $finishText.text('¡Has ganado la partida!');
+                $imgW.show();
+                $finish.openModal();
+            } else {
+                $finishText.text('Tu rival ha ganado la partida');
+                $imgL.show();
+                $finish.openModal();
+            }
+        } else if (winners.length > 0) {
+            $finishText.text('La partida ha terminado en empate');
+            $imgD.show();
+            $finish.openModal();
         } else
-            console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
+            alert('¡¡¡nadie ha ganado la partida!!! ¿¿??');
 
         resetGame();
     });

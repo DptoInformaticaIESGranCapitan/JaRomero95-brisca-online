@@ -178,6 +178,7 @@
 {% block scripts %}
     {{ parent() }}
     <script src="{{ asset('js/game3.js') }}"></script>
+    <script src="{{ asset('js/lib/jquery-ui.min.js') }}"></script>
     <script>
         $(document).ready(function () {
             $('.modal-trigger').leanModal();
@@ -231,13 +232,65 @@
 
     <div class="row margin-bottom-none">
         <div id="game-container" class="col s12 m7">
+
             <div id="over-game">
                 <button class="btn" id="search-game">Buscar partida</button>
             </div>
             <div id="game">
 
-                <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="playerImg" id="iImg">
-                <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" class="playerImg" id="oponnentImg">
+                {#Unused#}
+                <div id="game-alert">
+                    <p>Hola mundo</p>
+                </div>
+
+                {# finish game modal#}
+                <div id="finish" class="modal">
+                    <div class="modal-content">
+                        <h4>Final de la partida</h4>
+
+                        <table>
+                            <tr>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>Puntuación</th>
+                            </tr>
+                            <tr>
+                                <td>{{ asset('uploads/images/' ~ user.imgPath ) }}</td>
+                                <td>{{ user.nick }}</td>
+                                <td id="finish-my-score"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img src="" id="finish-oponnent-img">
+                                </td>
+                                <td id="finish-oponnent-name"></td>
+                                <td id="finish-oponnent-score"></td>
+                            </tr>
+                        </table>
+
+                        <div class="result-img">
+                            <img id="winner" src="{{ asset('img/winner.png') }}">
+                            <img id="loser" src="{{ asset('img/loser.png') }}">
+                            <img id="draw" src="{{ asset('img/draw.png') }}">
+                        </div>
+                        <p id="finish-text">Tu rival afdslksfad ha ganado la partida</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cerrar</a>
+                    </div>
+                </div>
+
+                <div class="playerImg" id="iImg">
+                    <img src="{{ asset('uploads/images/' ~ user.imgPath ) }}">
+
+                    <div class="user-name truncate" id="my-name">{{ user.nick }}</div>
+                </div>
+
+                <div class="playerImg" id="oponnentImg">
+                    <img src="{{ asset('img/qmark.png') }}">
+
+                    <div class="user-name truncate" id="oponnent-name"></div>
+                </div>
                 {#FIXME Oponnent#}
 
                 <div style="display: none">
@@ -289,8 +342,8 @@
                 <div id="oponnent-cards" class="player-cards">
                 </div>
 
-                <div id="oponnent-play" class="play">
-                </div>
+                <div id="oponnent-play" class="play"></div>
+                <div id="oponnent-over" class="play"></div>
 
                 <div id="chrono-shadow" class="chrono">00</div>
                 <div id="chrono" class="chrono">00</div>
@@ -301,8 +354,8 @@
                     <div id="num"></div>
                 </div>
 
-                <div id="my-play" class="play">
-                </div>
+                <div id="my-play" class="play"></div>
+                <div id="my-over" class="play"></div>
 
                 <div id="my-cards" class="player-cards">
                 </div>

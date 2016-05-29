@@ -1,10 +1,12 @@
-function Player(name) {
+function Player(name, img) {
     'use strict';
 
     /**
      * Nombre del jugador
      */
     this.name = name;
+
+    this.img = img;
 
     /**
      * Cartas del jugador, máximo 3

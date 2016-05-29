@@ -58,7 +58,7 @@ var listeners = function (io) {
         /**
          * Gestiona la conexión de un socket nuevo
          */
-        socket.on('join', function (name) {
+        socket.on('join', function (name, img) {
             //busco si existe
             var user = global.users[name];
 
@@ -75,6 +75,7 @@ var listeners = function (io) {
                 // No existe, lo creo
                 user = {
                     name: name,
+                    img: img,
                     connect: true,
                     socket: socket
                 };

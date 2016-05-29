@@ -1,4 +1,4 @@
-(function (window, undefined, $, socket, name) {
+(function (window, undefined, $, socket) {
     'use strict';
     var $m = $('#m'),
         $m2 = $('#m2'),
@@ -25,7 +25,7 @@
     }
 
     $(window).load(function () {
-        socket.emit('join', name);
+        socket.emit('join', name, img);
     });
 
     // Chat general a la derecha
@@ -114,4 +114,4 @@
             '<strong>' + user + ' se ha conectado al chat</strong>'
         ));
     });
-})(window, undefined, $, socket, name);
+})(window, undefined, $, socket);
