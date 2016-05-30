@@ -1,5 +1,5 @@
 {% extends 'layout.html.twig' %}
-
+{# TODO sonidos#}
 {% block stylesheets %}
     {{ parent() }}
 
@@ -230,6 +230,43 @@
         </div>
     </div>
 
+    {# finish game modal#}
+    <div id="finish" class="modal">
+        <div class="modal-content">
+            {#<h4>Final de la partida</h4>#}
+
+            <table>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Puntuación</th>
+                </tr>
+                <tr>
+                    <td><img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" id="finish-user-img" class="finish-avatar"></td>
+                    <td>{{ user.nick }}</td>
+                    <td id="finish-my-score"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="" id="finish-oponnent-img" class="finish-avatar">
+                    </td>
+                    <td id="finish-oponnent-name"></td>
+                    <td id="finish-oponnent-score"></td>
+                </tr>
+            </table>
+
+            <div class="result-img">
+                <img id="winner" src="{{ asset('img/winner.png') }}">
+                <img id="loser" src="{{ asset('img/loser.png') }}">
+                <img id="draw" src="{{ asset('img/draw.png') }}">
+            </div>
+            <p id="finish-text" class="center-align">Tu rival afdslksfad ha ganado la partida</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cerrar</a>
+        </div>
+    </div>
+
     <div class="row margin-bottom-none">
         <div id="game-container" class="col s12 m7">
 
@@ -241,43 +278,6 @@
                 {#Unused#}
                 <div id="game-alert">
                     <p>Hola mundo</p>
-                </div>
-
-                {# finish game modal#}
-                <div id="finish" class="modal">
-                    <div class="modal-content">
-                        <h4>Final de la partida</h4>
-
-                        <table>
-                            <tr>
-                                <th>Imagen</th>
-                                <th>Nombre</th>
-                                <th>Puntuación</th>
-                            </tr>
-                            <tr>
-                                <td>{{ asset('uploads/images/' ~ user.imgPath ) }}</td>
-                                <td>{{ user.nick }}</td>
-                                <td id="finish-my-score"></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <img src="" id="finish-oponnent-img">
-                                </td>
-                                <td id="finish-oponnent-name"></td>
-                                <td id="finish-oponnent-score"></td>
-                            </tr>
-                        </table>
-
-                        <div class="result-img">
-                            <img id="winner" src="{{ asset('img/winner.png') }}">
-                            <img id="loser" src="{{ asset('img/loser.png') }}">
-                            <img id="draw" src="{{ asset('img/draw.png') }}">
-                        </div>
-                        <p id="finish-text">Tu rival afdslksfad ha ganado la partida</p>
-                    </div>
-                    <div class="modal-footer">
-                        <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cerrar</a>
-                    </div>
                 </div>
 
                 <div class="playerImg" id="iImg">

@@ -80,17 +80,17 @@
         //        }, 3000));
     }
 
-    function showWinnerHand(winner){
+    function showWinnerHand(winner) {
 
-        if(winner === 0){
+        if (winner === 0) {
             $oponnentOver.css('backgroundColor', 'rgba(255,0,0,0.6)');
             $myOver.css('backgroundColor', 'rgba(0,255,0,0.6)');
-        }else {
+        } else {
             $oponnentOver.css('backgroundColor', 'rgba(0,255,0,0.6)');
             $myOver.css('backgroundColor', 'rgba(255,0,0,0.6)');
         }
 
-        setTimeout(function(){
+        setTimeout(function () {
             $oponnentOver.css('backgroundColor', 'transparent');
             $myOver.css('backgroundColor', 'transparent');
             $myPlay.html('');
@@ -164,8 +164,22 @@
         } else {
             console.log('No hay carta antigua');
         }
-
         $elem.addClass(classStr);
+        // rota 90 grados con animación para que desaparezca
+        //$elem.animate({
+        //    rotate: '360deg'
+        //}, 3000, function() {
+            // añado la clase para que se vea la carta
+
+
+            // roto sin animación a 270 para que no se vea pero a continuación puede seguir el mismo sentido de antes y no se quede del revés
+            //$elem.css('transform', 'rotateY(270deg)');
+
+            // roto completamente para que se vea la carta
+            //$elem.animate({
+            //    transform: 'rotateY(360deg)'
+            //}, 2000);
+        //});
     }
 
     /**
@@ -521,7 +535,7 @@
          * @type {number}
          */
         var winner;
-        if(playerName === name) {
+        if (playerName === name) {
             winner = 0;
         } else {
             winner = 1;
@@ -531,69 +545,35 @@
         showWinnerHand(winner);
     });
 
-    socket.on('final', function (players) {
-        var player1,
-            player2,
-            /**
-             * me = 0
-             * oponnent = 1
-             * draw = 2
-             */
-            winner;
+    socket.on('score', function (playerName, score) {
+        if (playerName === name) {
+            $finishMyScore.text(score);
+        } else {
+            $finishOponnentScore.text(score);
+        }
+    });
 
+    socket.on('winners', function (winnersNames) {
         $imgD.hide();
         $imgL.hide();
         $imgW.hide();
 
-        player1 = players[0];
-        player2 = players[1];
-
-        // establezco las puntuaciones en el dom
-        if(player1.name === name){
-            $finishMyScore.text(player1.score);
-            $finishOponnentScore.text(player2.score)
-
-            if(player1.score > player2.score){
-                winner = 0;
-            } else if (player1.score < player2.score) {
-                winner = 1;
-            } else {
-                winner = 2;
-            }
-
-        } else {
-            $finishMyScore.text(player2.score);
-            $finishOponnentScore.text(player1.score)
-
-            if(player1.score > player2.score){
-                winner = 1;
-            } else if (player1.score < player2.score) {
-                winner = 0;
-            } else {
-                winner = 2;
-            }
-        }
-
-
-
-
-        if (winners.length == 1){
-            var winner = winners[0];
-            if (winner.name === name){
-                $finishText.text('¡Has ganado la partida!');
+        if (winnersNames.length == 1) {
+            var winner = winnersNames[0];
+            if(winner === name){
                 $imgW.show();
-                $finish.openModal();
+                $finishText.text('¡Has ganado la partida!');
             } else {
-                $finishText.text('Tu rival ha ganado la partida');
                 $imgL.show();
-                $finish.openModal();
+                $finishText.text('Tu oponente ha ganado la partida');
             }
-        } else if (winners.length > 0) {
+        } else if (winnersNames.length > 0) {
             $finishText.text('La partida ha terminado en empate');
             $imgD.show();
-            $finish.openModal();
         } else
-            alert('¡¡¡nadie ha ganado la partida!!! ¿¿??');
+            console.log('¡¡¡nadie ha ganado la partida!!! ¿¿??');
+
+        $finish.openModal();
 
         resetGame();
     });

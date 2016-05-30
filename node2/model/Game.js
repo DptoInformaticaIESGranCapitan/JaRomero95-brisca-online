@@ -423,17 +423,23 @@ Game.prototype.handlerState = function () {
             this.state = this.states.playHand;
             break;
         case this.states.finish:
-            // Solo queda anunciar la puntuación final
-            var i, player, players = [];
-            for (i = 0; i < this.winners.length; i++) {
-                player = this.winners[i];
-                players.push({
-                    name: player.name,
-                    score: player.score
-                });
+            // Solo queda anunciar al ganador o ganadores, pero solo se debe enviar el nombre
+            var i,
+                winner,
+                winnerNames = [],
+                player;
+
+            for (i = 0; i < this.players.length; i++ ) {
+                player = this.players[i];
+                this.notifyAll('score', player.name, player.score);
             }
 
-            this.notifyAll('final', players);
+            for (i = 0; i < this.winners.length; i++ ) {
+                winner = this.winners[i];
+                winnerNames.push(winner.name);
+            }
+
+            this.notifyAll('winners', winnerNames);
 
             this.removeUsersGame();
 

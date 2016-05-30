@@ -3,6 +3,8 @@ $height: 480;
 $cardWidth: 58;
 $cardHeight: 84;
 
+// TODO over en las cartas
+
 #game-container{
   margin-top: -10px;
   background: green;
@@ -98,6 +100,11 @@ $cardHeight: 84;
   background-origin: content-box;
   display: inline-block;
   vertical-align: top;
+}
+
+#my-cards .game-card:hover {
+  transform: translate(-1px, -6px);
+  box-shadow: 2px 2px 10px black;
 }
 
 .chrono {
@@ -238,13 +245,36 @@ $cardHeight: 84;
   }
 }
 
+.finish-avatar {
+  height: 50px;
+  width: 50px;
+}
+
+#finish-text {
+  font-family: 'Rye', cursive;
+  font-size: 1.7em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#finish {
+  td, th {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+  }
+
+  .modal-content {
+    padding-bottom: 5px;
+  }
+}
 
 .result-img {
   text-align: center;
 
   img {
     display: none;
-    height: 250px;
+    height: 140px;
     width: auto;
   }
 }
