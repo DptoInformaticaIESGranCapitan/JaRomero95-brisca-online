@@ -41,7 +41,51 @@
         oneTime = true,
         $oponnentOver = $('#oponnent-over'),
         $myOver = $('#my-over'),
-        restCards = 40;
+        restCards = 40,
+        /**
+         * 0 = mio, 1 = oponente
+         * @type {number}
+         */
+        turn = -1;
+
+    function animateFlipCard($elem, classStr) {
+        var angle = 90,
+            halfDuration = 300;
+        $({deg: 0}).animate({deg: angle}, {
+            duration: halfDuration,
+            easing: 'linear',
+            step: function (now) {
+                // in the step-callback (that is fired each step of the animation),
+                // you can use the `now` paramter which contains the current
+                // animation-position (`0` up to `angle`)
+                $elem.css({
+                    transform: 'rotateY(' + now + 'deg)'
+                });
+            },
+            complete: function(){
+                $elem.addClass(classStr);
+                $elem.css('transform', 'rotateY(270deg)');
+
+                var angle = 360;
+                $({deg: 270}).animate({deg: angle}, {
+                    duration: halfDuration,
+                    easing: 'linear',
+                    step: function(now) {
+                        // in the step-callback (that is fired each step of the animation),
+                        // you can use the `now` paramter which contains the current
+                        // animation-position (`0` up to `angle`)
+                        $elem.css({
+                            transform: 'rotateY(' + now + 'deg)'
+                        });
+                    },
+                    complete: function(){
+                        $elem.css('transform', 'rotateY(0deg)');
+                    }
+                });
+
+            }
+        });
+    }
 
     function resetGame() {
 
@@ -123,6 +167,7 @@
     function finishChrono() {
         clearInterval(chronoInterval);
         $chrono.text('--');
+        turn = -1;
         $chronoShadow.text('--');
     }
 
@@ -151,8 +196,9 @@
      * @param $elem elemento del DOM que contiene la carta
      * @param card información de la carta para establecerla en el elemento
      * @param oldCard
+     * @param animate
      */
-    function turnOverCard($elem, card, oldCard) {
+    function turnOverCard($elem, card, oldCard, animate) {
         var classStr = card.suit + card.num.name,
             oldClassStr;
 
@@ -164,22 +210,10 @@
         } else {
             console.log('No hay carta antigua');
         }
-        $elem.addClass(classStr);
-        // rota 90 grados con animación para que desaparezca
-        //$elem.animate({
-        //    rotate: '360deg'
-        //}, 3000, function() {
-            // añado la clase para que se vea la carta
-
-
-            // roto sin animación a 270 para que no se vea pero a continuación puede seguir el mismo sentido de antes y no se quede del revés
-            //$elem.css('transform', 'rotateY(270deg)');
-
-            // roto completamente para que se vea la carta
-            //$elem.animate({
-            //    transform: 'rotateY(360deg)'
-            //}, 2000);
-        //});
+        if(animate)
+            animateFlipCard($elem, classStr);
+        else
+            $elem.addClass(classStr);
     }
 
     /**
@@ -277,6 +311,15 @@
     });
 
     $sample.click(function () {
+
+        if(restCards < 1)
+            return;
+
+        if(turn != 0){
+            Materialize.toast('No es tu turno', 4000);
+            return;
+        }
+
         var elem = $(this),
             actualSample,
             idCardToChange,
@@ -334,6 +377,21 @@
 
             // tengo la carta necesaria, así que la envío para cambiar
             socket.emit('change sample', cardToChange.id);
+        } else {
+            switch (idCardToChange){
+                case 7:
+                case 17:
+                case 27:
+                case 37:
+                    Materialize.toast('Necesitas el 7 de ' + actualSample.suit + ' para cambiar', 4000);
+                    break;
+                case 2:
+                case 12:
+                case 22:
+                case 32:
+                    Materialize.toast('Necesitas el 2 de ' + actualSample.suit + ' para cambiar', 4000);
+                    break;
+            }
         }
     });
 
@@ -358,7 +416,7 @@
         $tabs2.tabs('select_tab', 'c-game2');
 
 
-        showAlert('Te has unido a una partida');
+        Materialize.toast('Te has unido a una partida', 4000);
     });
 
     /**
@@ -375,6 +433,8 @@
 
         $finishOponnentName.text(username);
         $finishOponnentImg.attr('src', '/uploads/images/' + img);
+
+        Materialize.toast(username + ' se ha unido a la partida', 4000);
     });
 
     /**
@@ -388,11 +448,13 @@
 
         if (playerName === name) {
             $iDiv.addClass('turn');
-            showAlert('Tu turno');
+            Materialize.toast('Tu turno', 4000);
+            turn = 0;
         }
         else {
             $oponnentDiv.addClass('turn');
-            showAlert('Turno del oponente');
+            Materialize.toast('Turno del oponente', 4000);
+            turn = 1;
         }
         initChrono(time);
     });
@@ -413,7 +475,7 @@
         $myCards.append($htmlCard);
 
         // Pongo la carta bocarriba
-        turnOverCard($htmlCard, card);
+        turnOverCard($htmlCard, card, null, true);
 
         updateNum();
         console.log('He recibido la carta: ', card.suit, ' ', card.num.name);
@@ -469,6 +531,12 @@
     socket.on('change sample', function (playerName, oldSample, sample) {
         var $elem, $htmlCard;
 
+        if(playerName === name){
+            Materialize.toast('Has cambiado la muestra', 4000);
+        } else {
+            Materialize.toast(playerName + ' ha cambiado la muestra', 4000);
+        }
+
         console.log('Ha llegado un change sample del usuario ', playerName, ' donde la antigua muestra era ', oldSample.suit + ' - ', oldSample.num.name, ' y la nueva muestra es ', sample.suit + ' - ', sample.num.name);
 
         // si yo la he cambiado
@@ -496,8 +564,6 @@
             turnOverCard($htmlCard, oldSample);
         } else {
             // aquí si la muestra no la he cambiado yo mismo
-
-            showAlert('Tu oponente ha cambiado la muestra');
 
             // recojo cualquier carta bocaabajo de su contenedor
             $elem = $('#oponnent-cards .game-card').eq(0);
@@ -528,6 +594,11 @@
     });
 
     socket.on('winnerHand', function (playerName) {
+
+        if(playerName === name)
+            Materialize.toast('Has ganado la mano', 4000);
+        else
+            Materialize.toast(playerName + ' ha ganado la mano', 4000);
 
         /**
          * 0 = me
@@ -578,10 +649,5 @@
         resetGame();
     });
 
-    socket.on('scores', function (players) {
-        $scores.append('<p>' + players[0].name + ': ' + players[0].score + '</p>');
-        $scores.append('<p>' + players[1].name + ': ' + players[1].score + '</p>');
-        $scores.append('<p>--------------</p>');
-    });
 
 })(window, undefined, $, socket, name);

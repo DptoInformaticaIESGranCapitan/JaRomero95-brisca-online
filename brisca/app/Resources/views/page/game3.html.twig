@@ -1,5 +1,6 @@
 {% extends 'layout.html.twig' %}
 {# TODO sonidos#}
+{#FIXME min-width del juego es superior a 320#}
 {% block stylesheets %}
     {{ parent() }}
 
@@ -263,7 +264,7 @@
             <p id="finish-text" class="center-align">Tu rival afdslksfad ha ganado la partida</p>
         </div>
         <div class="modal-footer">
-            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cerrar</a>
+            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat" onclick="return false">Cerrar</a>
         </div>
     </div>
 

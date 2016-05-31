@@ -29,19 +29,19 @@
     {#<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>#}
     <script src="{{ asset('js/lib/materialize-0.97.6.js') }}"></script>
 
-    {% if user %}
-    <script src="{{ asset('js/lib/socket.io-1.4.5.js') }}"></script>
-    {#<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>#}
-
-    <script>
-        var name = '{{ user.nick }}',
-            img = '{{ user.imgPath }}',
-            socket = io('http://localhost:3000');
-    </script>
-
-    <script src="{{ asset('js/chat.js') }}"></script>
     <script src="{{ asset('js/base.js') }}"></script>
 
+    {% if user %}
+        <script src="{{ asset('js/lib/socket.io-1.4.5.js') }}"></script>
+        {#<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>#}
+{# TODO imagen aleatoria de cualquier color si no tiene avatar #}
+        <script>
+            var name = '{{ user.nick }}',
+                img = '{{ user.imgPath }}',
+                socket = io('http://localhost:3000');
+        </script>
+
+        <script src="{{ asset('js/chat.js') }}"></script>
     {% endif %}
 {% endblock %}
 </body>
