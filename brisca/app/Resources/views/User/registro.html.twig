@@ -3,11 +3,10 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            {# FIXME require true en plainpassword solo en esta vista #}
             <div class="col s12 m8 offset-m2 l6 offset-l3 margin-bottom-l margin-top-l">
                 {{ form_start(form) }}
 
-                <p class="center">REGISTRO</p>
+                <p class="center {{ mainColor }}-text text-darken-2">REGISTRO</p>
 
                 {% set errors = form_errors(form) %}
                 {% if errors %}
@@ -16,8 +15,11 @@
                     </div>
                 {% endif %}
 
-                {{ form_label(form.email, null, {'label': 'Email'}) }}
-                {{ form_widget(form.email, {'attr': {'placeholder': 'Email'}}) }}
+                {#EMAIL#}
+                <div class="input-field">
+                    {{ form_widget(form.email) }}
+                    {{ form_label(form.email, null, {'label': 'Email'}) }}
+                </div>
                 {% set errors = form_errors(form.email) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
@@ -25,8 +27,11 @@
                     </div>
                 {% endif %}
 
-                {{ form_label(form.nick, null, {'label': 'Nombre de usuario'}) }}
-                {{ form_widget(form.nick, {'attr': {'placeholder': 'Nombre de usuario'}}) }}
+                {#NICK#}
+                <div class="input-field">
+                    {{ form_widget(form.nick) }}
+                    {{ form_label(form.nick, null, {'label': 'Nombre de usuario'}) }}
+                </div>
                 {% set errors = form_errors(form.nick) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
@@ -34,8 +39,11 @@
                     </div>
                 {% endif %}
 
-                {{ form_label(form.plainPassword.first) }}
-                {{ form_widget(form.plainPassword.first, {'attr': {'placeholder': 'Contraseña', 'required': 'required'}}) }}
+                {#PASSWD#}
+                <div class="input-field">
+                    {{ form_widget(form.plainPassword.first, {'attr': {'required': 'required'}}) }}
+                    {{ form_label(form.plainPassword.first) }}
+                </div>
                 {% set errors = form_errors(form.plainPassword.first) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
@@ -43,8 +51,11 @@
                     </div>
                 {% endif %}
 
-                {{ form_label(form.plainPassword.second) }}
-                {{ form_widget(form.plainPassword.second, {'attr': {'placeholder': 'Confirmar contraseña', 'required': 'required'}}) }}
+                {#CONFIRM#}
+                <div class="input-field">
+                    {{ form_widget(form.plainPassword.second, {'attr': {'required': 'required'}}) }}
+                    {{ form_label(form.plainPassword.second) }}
+                </div>
                 {% set errors = form_errors(form.plainPassword.second) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
@@ -52,9 +63,9 @@
                     </div>
                 {% endif %}
 
-
+                {#IMG#}
                 <div class="file-field input-field">
-                    <div class="btn btn-small">
+                    <div class="btn btn-small {{ accentColor }}">
                         <span>Imagen de perfil</span>
                         {{ form_widget(form.img, {'attr': {'placeholder': 'Imagen de perfil'}}) }}
                     </div>
@@ -70,8 +81,8 @@
                 {% endif %}
 
                 <div class="right">
-                    <a class="margin-right-s btn-flat" href="/">Volver</a>
-                    <button class="btn waves-effect waves-light btn-small" type="submit">
+                    <a class="margin-right-s btn-flat {{ accentColor }}-text text-darken-3" href="/">Volver</a>
+                    <button class="btn waves-effect waves-light btn-small {{ accentColor }}" type="submit">
                         Registrarse
                         <i class="material-icons right">send</i>
                     </button>

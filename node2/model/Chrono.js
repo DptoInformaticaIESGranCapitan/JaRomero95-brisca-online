@@ -31,7 +31,7 @@ Chrono.prototype.init = function (time) {
             clearInterval(that.interval);
             that.game.handlerState();
         }
-    }, 1000);
+    }, 500);
 };
 
 Chrono.prototype.finish = function () {

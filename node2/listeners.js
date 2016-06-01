@@ -17,7 +17,10 @@ function sendGame(user) {
     if (idGame) {
         var game = global.games[idGame];
         if (game) {
-            game.sendLateGame(user.name);
+            if(game.start)
+                game.sendLateGame(user.name);
+            else
+                console.log('La partida no ha empezado. Esto parece ser que provocó un error anteriormente');
         } else {
             console.log('no se ha podido recoger el juego');
         }
@@ -63,8 +66,7 @@ var listeners = function (io) {
             var user = global.users[name];
 
             if (user) {
-                // Existe, lo conecto
-                user.connect = true;
+                // actualizo el socket por si es necesario
                 user.socket = socket;
                 if (user.game) {
                     sendGame(user);
@@ -76,7 +78,6 @@ var listeners = function (io) {
                 user = {
                     name: name,
                     img: img,
-                    connect: true,
                     socket: socket
                 };
             }
@@ -103,7 +104,6 @@ var listeners = function (io) {
             if (user) {
                 console.log('Se ha desconectado: ' + user.name);
                 removeUserFromGame(user);
-                user.connect = false;
             } else {
                 console.log('Alguien se ha desconectado');
             }

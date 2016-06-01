@@ -1,10 +1,13 @@
 {% extends 'base.html.twig' %}
 
+{% set mainColor = 'green' %}
+{% set accentColor = 'amber' %}
+
 {% block body %}
 
     <div id="load-layer" class="valign-wrapper">
         <div class="preloader-wrapper big active valign">
-            <div class="spinner-layer spinner-blue-only">
+            <div class="spinner-layer spinner-yellow-only">
                 <div class="circle-clipper left">
                     <div class="circle"></div>
                 </div><div class="gap-patch">
@@ -19,11 +22,11 @@
     {% block header %}
 
         <ul id="dropdown1" class="dropdown-content">
-            <li><a href="/perfil">Perfil</a></li>
-            <li><a href="/logout">Salir</a></li>
+            <li><a href="/perfil" class="{{ mainColor }}-text">Perfil</a></li>
+            <li><a href="/logout" class="{{ mainColor }}-text">Salir</a></li>
         </ul>
 
-        <nav>
+        <nav class="{{ mainColor }}">
             <div class="nav-wrapper container">
                 <a href="{{ path('homepage') }}" class="brand-logo left">
                     <span class="hide-on-med-and-up">Brisca</span>
@@ -36,7 +39,7 @@
                                 Inicio
                             </a>
                         </li>
-                        <li class="hide-on-small-only {% if currentPath == path('play') %}active{% endif %}">
+                        <li class="{% if currentPath == path('play') %}hide-on-small-only active{% endif %}">
                             <a href="/jugar">
                                 Jugar
                             </a>
@@ -49,12 +52,14 @@
                                 {#<span class="hide-on-small-only">{{ user.nick }}</span>#}
                             </a>
                         </li>
-                        <li class="hide-on-med-and-up">
-                            {#<!-- Modal Trigger -->#}
-                            <a id="trigger" href="#modal1" data-target="modal1" class="modal-trigger">
-                                <i class="material-icons">textsms</i>
-                            </a>
-                        </li>
+                        {% if currentPath == path('play') %}
+                            <li class="hide-on-med-and-up">
+                                {#<!-- Modal Trigger -->#}
+                                <a id="trigger" href="#modal1" data-target="modal1" class="modal-trigger">
+                                    <i class="material-icons">textsms</i>
+                                </a>
+                            </li>
+                        {% endif %}
                     </ul>
                 {% endif %}
             </div>
@@ -67,10 +72,11 @@
     </main>
 
     {% block footer %}
-        <footer class="page-footer">
+        <footer class="page-footer {{ mainColor }}">
             <div class="container center">
                 <h5 class="white-text">Contacto</h5>
 
+                {#FIXME iconos redes sociales#}
                 <div>
                     <a class="grey-text text-lighten-3" href="#">Twitter</a>
                     <a class="grey-text text-lighten-3" href="#">GitHub</a>

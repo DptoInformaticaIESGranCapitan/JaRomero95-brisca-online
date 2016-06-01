@@ -1,7 +1,7 @@
 var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
-// FIXME la meustra se reparte antes que la penúltima carta?
+
 var numPlayers = 2,
     timeMargin = 2,
     timeTurn = 20;
@@ -95,7 +95,6 @@ function Game(io) {
  * @param user Usuario que desea añadirse
  */
 Game.prototype.addUser = function (user) {
-    // FIXME no añadir dos veces al mismo jugador
     'use strict';
     if (this.numUsers < numPlayers) {
         // solo añado si no existe ya en la partida
@@ -138,7 +137,6 @@ Game.prototype.init = function () {
     this.sendInitInfo();
 };
 
-// TODO enviar la información al usuario que se reconecta
 Game.prototype.sendLateGame = function (userName) {
     'use strict';
     var player = this.getPlayer(userName),
@@ -236,8 +234,6 @@ Game.prototype.distribute = function () {
     this.notifyAll('numCards', this.deck.cards.length);
 
     this.chrono.init(timeMargin);
-
-    console.log(this.deck.cards);
 };
 
 /**
@@ -245,8 +241,6 @@ Game.prototype.distribute = function () {
  */
 Game.prototype.distributeHand = function () {
     'use strict';
-
-    console.log(this.deck.cards);
 
     if (this.hasCards()) {
         var i,
@@ -310,7 +304,11 @@ Game.prototype.notify = function (name, event, data1, data2, data3, data4) {
     //console.log('[DEBUG GAME NOTIFY] Evento: ' + event + ' | Usuario: ' + name + ' | Info: ', data1, data2, data3, data4);
     var user = this.users[name];
     if (user) {
-        user.socket.emit(event, data1, data2, data3, data4);
+        if(user.socket){
+            user.socket.emit(event, data1, data2, data3, data4);
+        } else {
+            console.log('!!!!!Game notify: se intentaba enviar algo a un socket sin definir');
+        }
     } else {
         console.log('[DEBUG GAME NOTIFY] no hay usuario!!' + name);
     }
@@ -330,7 +328,11 @@ Game.prototype.notifyAll = function (event, data1, data2, data3, data4) {
     var user, users = this.users;
     for (user in users) {
         if (users.hasOwnProperty(user)) {
-            users[user].socket.emit(event, data1, data2, data3, data4);
+            if (users[user].socket) {
+                users[user].socket.emit(event, data1, data2, data3, data4);
+            } else {
+                console.log('!!!!!Game notifyAll: se intentaba enviar algo a un socket sin definir');
+            }
         }
     }
 };
@@ -605,10 +607,10 @@ Game.prototype.sendTurn = function () {
     'use strict';
     var player = this.players[this.turn],
         user = this.users[player.name];
-
+    
     if (user) {
         // compruebo si está online el jugador al que le toca
-        if (user.connect) {
+        if (user.socket.connected) {
             this.chrono.init(timeTurn);
         } else {
             // como está desconectado, se tira en 1 seg
@@ -745,66 +747,6 @@ Game.prototype.tryChangeSample = function (userName, id) {
     }
 };
 
-Game.prototype.tryChangeSample2 = function (userName, id) {
-    'use strict';
-    var player = this.getPlayer(userName),
-        card;
-
-    if (!this.hasCards()) {
-        console.log('NO HAY CARTAS');
-        return;
-    }
-
-    if (player) {
-        if (this.hasTurn(player)) {
-            card = player.playCard(id);
-
-            // existe la carta que el usuario quiere canjear
-            if (card) {
-
-                // compruebo si la carta es del mismo palo que la muestra
-                if (card.suit === this.sample.suit) {
-
-                    // compruebo si la carta enviada es el 7 => value 5
-                    if (card.num.name === 'Siete') {
-
-                        // compruebo si la carta de muestra es mayor que el 7
-                        if (this.sample.num.value > card.num.value) {
-
-                            // aquí ya hago el cambio
-                            this.changeSample(player, card);
-                        } else {
-                            console.log('la carta de muestra actual no es mayor que 7');
-                        }
-
-                        // compruebo si la carta enviada es el 2 => value 1
-                    } else if (card.num.name === 'Dos') {
-
-                        // compruebo si la carta de muestra es mayor que el 2 y menor que el 7 => value 5
-                        if (this.sample.num.value > card.num.value && this.sample.value < 5) {
-
-                            // aquí ya hago el cambio
-                            this.changeSample(player, card);
-                        } else {
-                            console.log('la carta de muestra actual no es mayor que 2');
-                        }
-                    } else {
-                        console.log('La carta actual no es el 2 ni el 7');
-                    }
-                } else {
-                    console.log('La carta enviada no es una muestra');
-                }
-            } else {
-                console.log('El player no tiene esa carta en la mano');
-            }
-        } else {
-            console.log('el player no tiene el turno');
-        }
-    } else {
-        console.log('el player no existe');
-    }
-};
-
 Game.prototype.changeSample = function (player, card) {
     // almaceno la antigua muestra y la elimino de la baraja
     var oldSample = this.deck.cards.shift();
@@ -864,25 +806,6 @@ Game.prototype.isEnd = function () {
  */
 Game.prototype.hasCards = function () {
     return this.deck.cards.length >= this.players.length;
-};
-
-Game.prototype.automaticPlayCard = function (player) {
-    'use strict';
-    var card;
-    // compruebo si ha tirado
-    if (!player.cardPlayed) {
-        // no ha tirado
-
-        // lanzamiento automático
-        card = player.playCard();
-
-        if (card) {
-            // Notifico a todos la carta que ha jugado el usuario
-            this.notifyAll('played', player.name, card);
-        } else {
-            console.log('No ha jugado carta, no debería suceder');
-        }
-    }
 };
 
 Game.prototype.removeUsersGame = function () {

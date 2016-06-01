@@ -192,7 +192,7 @@
     {#chat modal: replicar para cambiar los id#}
     <div id="modal1" class="modal">
         <div>
-            <button class="modal-close btn-flat right">X</button>
+            <button class="btn-flat modal-close right">X</button>
         </div>
         <div class="modal-content">
             <div class="chat-box">
@@ -206,12 +206,18 @@
                     <ul class="messages msgs"></ul>
                     <form id="chat2" class="chat">
                         <div class="margin-bottom-none center">
-                            <input id="m2" type="text" autocomplete="off" placeholder="Mensaje"
-                                   class="margin-bottom-none margin-right-m">
-                            <button class="btn-floating" type="submit">
-                                <i class="material-icons">send</i>
-                            </button>
+                            <div class="input-field input-group">
+                                <input id="m2" type="text" autocomplete="off" class="margin-bottom-none">
+                                <label for="m2">Mensaje</label>
+                                <span class="suffix">
+                                    <button class="btn-floating {{ accentColor }} waves-effect waves-light" type="submit">
+                                        <i class="material-icons">send</i>
+                                    </button>
+                                </span>
+                            </div>
+
                         </div>
+
                     </form>
                 </div>
 
@@ -219,11 +225,15 @@
                     <ul class="messages msgs-game"></ul>
                     <form id="chat-game2" class="chat">
                         <div class="margin-bottom-none center">
-                            <input id="m-game2" type="text" autocomplete="off" placeholder="Mensaje"
-                                   class="margin-bottom-none margin-right-m">
-                            <button class="btn-floating" type="submit">
-                                <i class="material-icons">send</i>
-                            </button>
+                            <div class="input-field input-group">
+                                <input id="m-game2" type="text" autocomplete="off" class="margin-bottom-none">
+                                <label for="m-game2">Mensaje</label>
+                                <span class="suffix">
+                                    <button class="btn-floating {{ accentColor }} waves-effect waves-light" type="submit">
+                                        <i class="material-icons">send</i>
+                                    </button>
+                                </span>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -243,7 +253,8 @@
                     <th>Puntuación</th>
                 </tr>
                 <tr>
-                    <td><img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" id="finish-user-img" class="finish-avatar"></td>
+                    <td><img src="{{ asset('uploads/images/' ~ user.imgPath ) }}" id="finish-user-img"
+                             class="finish-avatar"></td>
                     <td>{{ user.nick }}</td>
                     <td id="finish-my-score"></td>
                 </tr>
@@ -261,10 +272,12 @@
                 <img id="loser" src="{{ asset('img/loser.png') }}">
                 <img id="draw" src="{{ asset('img/draw.png') }}">
             </div>
-            <p id="finish-text" class="center-align">Tu rival afdslksfad ha ganado la partida</p>
+            <p id="finish-text" class="center-align"></p>
+            {#fixme ¿no translate hover card my-cards#}
         </div>
         <div class="modal-footer">
-            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat" onclick="return false">Cerrar</a>
+            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat"
+               onclick="return false">Cerrar</a>
         </div>
     </div>
 
@@ -272,8 +285,9 @@
         <div id="game-container" class="col s12 m7">
 
             <div id="over-game">
-                <button class="btn" id="search-game">Buscar partida</button>
+                <button class="btn {{ accentColor }} waves-effect waves-light" id="search-game">Buscar partida</button>
             </div>
+
             <div id="game">
 
                 {#Unused#}
@@ -292,9 +306,8 @@
 
                     <div class="user-name truncate" id="oponnent-name"></div>
                 </div>
-                {#FIXME Oponnent#}
 
-                <div style="display: none">
+                {#<div style="display: none">
                     <div class="game-card espadasAs"></div>
                     <div class="game-card espadasDos"></div>
                     <div class="game-card espadasTres"></div>
@@ -338,7 +351,7 @@
                     <div class="game-card copasSota"></div>
                     <div class="game-card copasCaballo"></div>
                     <div class="game-card copasRey"></div>
-                </div>
+                </div>#}
 
                 <div id="oponnent-cards" class="player-cards">
                 </div>
@@ -361,15 +374,9 @@
                 <div id="my-cards" class="player-cards">
                 </div>
             </div>
-
-            <div id="game-info" style="display: none">
-                <div id="chrono">0</div>
-                <div>Turno de <span id="turn"></span></div>
-                <div id="scores"></div>
-            </div>
         </div>
 
-        <div id="chat-container" class="col m5 hide-on-small-only">
+        <div id="chat-container" class="col m5 hide-on-small-only {{ mainColor }} lighten-4">
             {% include 'includes/chat.html.twig' %}
         </div>
     </div>

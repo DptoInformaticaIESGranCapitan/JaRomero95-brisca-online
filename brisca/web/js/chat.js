@@ -9,16 +9,24 @@
         $modal = $('#modal1'),
         $tabChatGame = $('#tab-chat-game'),
         $tabChatGame2 = $('#tab-chat-game2'),
-        $trigger = $('#trigger');
+        $trigger = $('#trigger'),
+        maxChatMsg = 50;
 //                    $action1 = $('#action1');
 
     $tabChatGame.addClass('disabled');
     $tabChatGame2.addClass('disabled');
 
+    function restrictMaxMsg($ul){
+        //$('.messages.msgs').eq(1).children().eq(0).remove()
+        if ($ul.children().size() > maxChatMsg) {
+            $ul.children().eq(0).remove();
+        }
+    }
+
     function getChatMsg(username, msg) {
         var float = (username === name) ? 'right' : '';
-        return '<div class="chat-msg ' + float + '">' +
-            '<span class="msg-name"><strong>' + username + '</strong></span><br/>' +
+        return '<div class="chat-msg green lighten-5 ' + float + '">' +
+            '<span class="msg-name green-text text-darken-4"><strong>' + username + '</strong></span><br/>' +
             '<span class="msg-msg">' + msg + '</span>' +
             '</div>' +
             '<div style="clear: both"></div>';
@@ -73,6 +81,7 @@
         $msgs.append($('<li>').html(
             getChatMsg(msg.user, msg.msg)
         ));
+        restrictMaxMsg($msgs.eq(0));
 
         // se hace scroll
         $msgs.scrollTop($msgs.prop('scrollHeight'));
@@ -80,6 +89,7 @@
         // se hace scroll para el otro chat si lo hay
         if ($msgs.size() > 1) {
             $msgs.eq(1).scrollTop($msgs.eq(1).prop('scrollHeight'));
+            restrictMaxMsg($msgs.eq(1));
         }
     });
 
@@ -90,12 +100,15 @@
             getChatMsg(username, msg)
         ));
 
+        restrictMaxMsg($msgsGame.eq(0));
+
         // se hace scroll
         $msgsGame.scrollTop($msgsGame.prop('scrollHeight'));
 
         // se hace scroll para el otro chat si lo hay
         if ($msgsGame.size() > 1) {
             $msgsGame.eq(1).scrollTop($msgsGame.eq(1).prop('scrollHeight'));
+            restrictMaxMsg($msgsGame.eq(1));
         }
 
         // blink en el botón de chat

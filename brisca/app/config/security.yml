@@ -9,7 +9,7 @@ security:
         - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/entrar, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/registro, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-#        - { path: ^/.+, roles: ROLE_USER } FIXME para acceder al _profiler
+        - { path: ^/.+, roles: ROLE_USER } # FIXME para acceder al _profiler
 
 
 

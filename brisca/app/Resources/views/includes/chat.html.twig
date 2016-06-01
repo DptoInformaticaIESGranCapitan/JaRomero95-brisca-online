@@ -1,20 +1,29 @@
-{# TODO general y de partida#}
 {#chat normal#}
+{#TODO toast en el avatar cuando envíen mensaje a la partida#}
 <div class="chat-box">
     <div class="">
-        <ul id="tabs" class="tabs">
-            <li id="tab-chat-general" class="tab"><a class="active" href="#c-general">General</a></li>
-            <li id="tab-chat-game" class="tab"><a href="#c-game">Partida</a></li>
+        <ul id="tabs" class="tabs {{ mainColor }} lighten-4">
+            <li id="tab-chat-general" class="tab">
+                <a class="active" href="#c-general">General</a>
+            </li>
+            <li id="tab-chat-game" class="tab">
+                <a href="#c-game">Partida</a>
+            </li>
         </ul>
     </div>
     <div id="c-general" class="msgs-container ">
         <ul class="messages msgs"></ul>
         <form id="chat" class="chat">
             <div class="margin-bottom-none center">
-                <input id="m" type="text" autocomplete="off" placeholder="Mensaje" class="margin-bottom-none margin-right-m">
-                <button class="btn-floating" type="submit">
-                    <i class="material-icons">send</i>
-                </button>
+                <div class="input-field input-group">
+                    <input id="m" type="text" autocomplete="off" class="margin-bottom-none margin-right-m">
+                    <label for="m">Mensaje</label>
+                    <span class="suffix">
+                        <button class="btn-floating {{ accentColor }} waves-effect waves-light" type="submit">
+                            <i class="material-icons">send</i>
+                        </button>
+                    </span>
+                </div>
             </div>
         </form>
     </div>
@@ -23,10 +32,17 @@
         <ul class="messages msgs-game"></ul>
         <form id="chat-game" class="chat">
             <div class="margin-bottom-none center">
-                <input id="m-game" type="text" autocomplete="off" placeholder="Mensaje" class="margin-bottom-none margin-right-m">
-                <button class="btn-floating" type="submit">
-                    <i class="material-icons">send</i>
-                </button>
+
+
+                <div class="input-field input-group">
+                    <input id="m-game" type="text" autocomplete="off" class="margin-bottom-none margin-right-m">
+                    <label for="m-game">Mensaje</label>
+                    <span class="suffix">
+                        <button class="btn-floating {{ accentColor }} waves-effect waves-light" type="submit">
+                            <i class="material-icons">send</i>
+                        </button>
+                    </span>
+                </div>
             </div>
         </form>
     </div>
