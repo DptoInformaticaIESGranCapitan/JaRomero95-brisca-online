@@ -2,6 +2,8 @@ var Player = require('./Player.js');//recibo el constructor
 var Chrono = require('./Chrono.js');//recibo el constructor
 var Deck = require('./Deck.js');//recibo el constructor
 
+// FIXME un usuario puede cambiar la muestra después de jugar su turno, puesto que conforme se envía y calcula la mano, el aún tiene el turno apuntándole
+
 var numPlayers = 2,
     timeMargin = 2,
     timeTurn = 20;

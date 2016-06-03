@@ -4,49 +4,18 @@
 // FIXME scroll al abrir el chat
 (function (window, undefined, $, socket, name) {
     'use strict';
-    var $search = $('#search-game'),
-        $overGame = $('#over-game'),
-        $myCards = $("#my-cards"),
-        $oponnentCards = $("#oponnent-cards"),
-        $sample = $('#sample'),
-        $myPlay = $('#my-play'),
-        $oponnentPlay = $('#oponnent-play'),
-        chronoInterval,
-        chronoFinish,
-        $chrono = $('#chrono'),
-        $chronoShadow = $('#chrono-shadow'),
-        $scores = $('#scores'),
-        $turn = $('#turn'),
-        $num = $('#num'),
-        $deck = $('#deck'),
-        $iDiv = $('#iImg'),
-        $oponnentDiv = $('#oponnentImg'),
-        $oponnentImg = $('#oponnentImg img'),
-        $oponnentName = $('#oponnent-name'),
-        $tabChatGame = $('#tab-chat-game'),
-        $tabChatGame2 = $('#tab-chat-game2'),
-        $tabs = $('#tabs'),
-        $tabs2 = $('#tabs2'),
-        $modalTrigger = $('#trigger'),
-        $gameAlert = $('#game-alert'),
-        $finish = $('#finish'),
-        $finishText = $('#finish-text'),
-        $finishOponnentImg = $('#finish-oponnent-img'),
-        $finishOponnentName = $('#finish-oponnent-name'),
-        $finishOponnentScore = $('#finish-oponnent-score'),
-        $finishMyScore = $('#finish-my-score'),
-        $imgW = $('#winner'),
-        $imgL = $('#loser'),
-        $imgD = $('#draw'),
-        oneTime = true,
-        $oponnentOver = $('#oponnent-over'),
-        $myOver = $('#my-over'),
-        restCards = 40,
-        /**
-         * 0 = mio, 1 = oponente
-         * @type {number}
-         */
-        turn = -1;
+    var $search, $overGame, $myCards, $oponnentCards, $sample, $myPlay, $oponnentPlay, chronoInterval, chronoFinish, $chrono, $chronoShadow, $scores, $turn, $num, $deck, $iDiv, $oponnentDiv, $oponnentImg, $oponnentName, $tabChatGame, $tabChatGame2, $tabs, $tabs2, $modalTrigger, $gameAlert, $finish, $finishText, $finishOponnentImg, $finishOponnentName, $finishOponnentScore, $finishMyScore, $imgW, $imgL, $imgD, oneTime, $oponnentOver, $myOver, restCards, soundDistribute, soundDraw, soundBg, soundFlip, soundLose, soundWin, turn, $msgsGame;
+
+    /**
+     * force load sounds on mobile devices
+     * @param element
+     */
+    //function load(element) {
+    //    element.play();
+    //    setTimeout(function () {
+    //        element.pause();
+    //    }, 10);
+    //}
 
     function animateFlipCard($elem, classStr) {
         var angle = 90,
@@ -62,7 +31,7 @@
                     transform: 'rotateY(' + now + 'deg)'
                 });
             },
-            complete: function(){
+            complete: function () {
                 $elem.addClass(classStr);
                 $elem.css('transform', 'rotateY(270deg)');
 
@@ -70,7 +39,7 @@
                 $({deg: 270}).animate({deg: angle}, {
                     duration: halfDuration,
                     easing: 'linear',
-                    step: function(now) {
+                    step: function (now) {
                         // in the step-callback (that is fired each step of the animation),
                         // you can use the `now` paramter which contains the current
                         // animation-position (`0` up to `angle`)
@@ -78,7 +47,7 @@
                             transform: 'rotateY(' + now + 'deg)'
                         });
                     },
-                    complete: function(){
+                    complete: function () {
                         $elem.css('transform', 'rotateY(0deg)');
                     }
                 });
@@ -99,29 +68,6 @@
         $overGame.fadeIn();
         $search.prop('disabled', false);
         $tabChatGame.addClass('disabled');
-    }
-
-    function showAlert(msg) {
-        //// si se estaba mostrando, lo ocultamos
-        //$gameAlert.hide(0);
-        //$gameAlert.removeClass('doAnim');
-        //
-        //// añadimos el nuevo mensaje
-        //$gameAlert.html('<p>' + msg + '</p>');
-        //
-        //// lo mostramos, inicialmente no se ve porque está rotado
-        //$gameAlert.show(0)
-        //    // lo hacemos rotar y hacerse visible después de mostrarse
-        //    .addClass('doAnim',
-        //
-        //        // temporizador para ocultarse
-        //        setTimeout(function () {
-        //            // lo ocultamos
-        //            $gameAlert.fadeOut(800, function () {
-        //                // después de ocultarse eliminamos la clase para que vuelve a la posición inicial
-        //                $gameAlert.removeClass('doAnim');
-        //            })
-        //        }, 3000));
     }
 
     function showWinnerHand(winner) {
@@ -210,7 +156,7 @@
         } else {
             console.log('No hay carta antigua');
         }
-        if(animate)
+        if (animate)
             animateFlipCard($elem, classStr);
         else
             $elem.addClass(classStr);
@@ -283,126 +229,6 @@
     }
 
     /**
-     * acciona la pestaña del chat la primera vez que
-     * se abre( solo el del diálogo)
-     */
-    $modalTrigger.click(function () {
-        if (oneTime) {
-            setTimeout(function () {
-                if ($tabChatGame.hasClass('disabled')) {
-                    $tabs2.tabs('select_tab', 'c-general2');
-                } else {
-                    $tabs2.tabs('select_tab', 'c-game2');
-                }
-
-                oneTime = false;
-            }, 100);
-        }
-    });
-
-    /**
-     * Envía al servidor la carta sobre la que se ha clickado
-     */
-    $myCards.click(".cards", function (ev) {
-        var elem = $(ev.target),
-            card = elem.data('card');
-        console.log('Ha intentado jugar: ' + card.id);
-        socket.emit('play', card.id);
-    });
-
-    $sample.click(function () {
-
-        if(restCards < 1)
-            return;
-
-        if(turn != 0){
-            Materialize.toast('No es tu turno', 4000);
-            return;
-        }
-
-        var elem = $(this),
-            actualSample,
-            idCardToChange,
-            $elemCardToChange,
-            cardToChange;
-
-        // cojo la carta de muestra
-        actualSample = $sample.data('card');
-
-        // Compruebo si la muestra es mayor que la carta 7 => value: 5
-        if (actualSample.num.value > 5) {
-
-            // en función del palo de muestra, busco la carta 7 en la baraja
-            switch (actualSample.suit) {
-                case 'espadas':
-                    idCardToChange = 7;
-                    break;
-                case 'bastos':
-                    idCardToChange = 17;
-                    break;
-                case 'oros':
-                    idCardToChange = 27;
-                    break;
-                case 'copas':
-                    idCardToChange = 37;
-                    break;
-            }
-        } else {
-            // compruebo que la muestra es mayor que la carta 2 => value: 1
-            if (actualSample.num.value > 1) {
-                // en función del palo de muestra, busco la carta 2 en la baraja
-                switch (actualSample.suit) {
-                    case 'espadas':
-                        idCardToChange = 2;
-                        break;
-                    case 'bastos':
-                        idCardToChange = 12;
-                        break;
-                    case 'oros':
-                        idCardToChange = 22;
-                        break;
-                    case 'copas':
-                        idCardToChange = 32;
-                        break;
-                }
-            }
-        }
-
-        // recojo el elemento de la carta necesitada para cambiar la brisca de la mano del usuario
-        $elemCardToChange = getElementCard(idCardToChange);
-
-        // si existe un elemento con esa carta
-        if ($elemCardToChange) {
-            cardToChange = $elemCardToChange.data('card');
-
-            // tengo la carta necesaria, así que la envío para cambiar
-            socket.emit('change sample', cardToChange.id);
-        } else {
-            switch (idCardToChange){
-                case 7:
-                case 17:
-                case 27:
-                case 37:
-                    Materialize.toast('Necesitas el 7 de ' + actualSample.suit + ' para cambiar', 4000);
-                    break;
-                case 2:
-                case 12:
-                case 22:
-                case 32:
-                    Materialize.toast('Necesitas el 2 de ' + actualSample.suit + ' para cambiar', 4000);
-                    break;
-            }
-        }
-    });
-
-    /**
-     * Buscar una partida
-     * */
-    $search.click(function () {
-        socket.emit('search game');
-    });
-
-    /**
      * Notifica que se ha unido a una partida
      * */
     socket.on('game', function (idGame) {
@@ -415,6 +241,9 @@
         $tabChatGame2.removeClass('disabled');
         $tabs2.tabs('select_tab', 'c-game2');
 
+        soundBg.play();
+
+        $msgsGame.html('');
 
         Materialize.toast('Te has unido a una partida', 4000);
     });
@@ -423,7 +252,6 @@
      *  Notifica que ha empezado la partida
      *  */
     socket.on('begin', function () {
-        showAlert('La partida va a comenzar');
         $search.prop('disabled', true);
     });
 
@@ -465,6 +293,8 @@
      * jQuery data('card')
      */
     socket.on('card', function (card) {
+        soundDistribute.play();
+
         // creo el elemento html
         var $htmlCard = $('<div class="game-card"></div>');
 
@@ -499,6 +329,8 @@
      * Notifica que un oponente ha recibido una carta
      */
     socket.on('oponnent card', function (player) {
+        soundDistribute.play();
+
         if (player === name)
             return;
 
@@ -517,6 +349,8 @@
      * Notifica que un jugador ha jugado una carta
      */
     socket.on('played', function (playerName, card) {
+        soundDistribute.play();
+
         console.log(playerName + ' ha jugado ', card);
         if (playerName === name) {
             onPlayCard(card);
@@ -529,9 +363,11 @@
     });
 
     socket.on('change sample', function (playerName, oldSample, sample) {
+        soundDistribute.play();
+
         var $elem, $htmlCard;
 
-        if(playerName === name){
+        if (playerName === name) {
             Materialize.toast('Has cambiado la muestra', 4000);
         } else {
             Materialize.toast(playerName + ' ha cambiado la muestra', 4000);
@@ -595,7 +431,7 @@
 
     socket.on('winnerHand', function (playerName) {
 
-        if(playerName === name)
+        if (playerName === name)
             Materialize.toast('Has ganado la mano', 4000);
         else
             Materialize.toast(playerName + ' ha ganado la mano', 4000);
@@ -625,20 +461,24 @@
     });
 
     socket.on('winners', function (winnersNames) {
+        soundBg.pause();
         $imgD.hide();
         $imgL.hide();
         $imgW.hide();
 
         if (winnersNames.length == 1) {
             var winner = winnersNames[0];
-            if(winner === name){
+            if (winner === name) {
                 $imgW.show();
+                soundWin.play();
                 $finishText.text('¡Has ganado la partida!');
             } else {
                 $imgL.show();
+                soundLose.play();
                 $finishText.text('Tu oponente ha ganado la partida');
             }
         } else if (winnersNames.length > 0) {
+            soundDraw.play();
             $finishText.text('La partida ha terminado en empate');
             $imgD.show();
         } else
@@ -649,5 +489,185 @@
         resetGame();
     });
 
+    // Init vars and listeners on DOM load
+    $(function () {
+        $search = $('#search-game');
+        $overGame = $('#over-game');
+        $myCards = $("#my-cards");
+        $oponnentCards = $("#oponnent-cards");
+        $sample = $('#sample');
+        $myPlay = $('#my-play');
+        $oponnentPlay = $('#oponnent-play');
+        $chrono = $('#chrono');
+        $chronoShadow = $('#chrono-shadow');
+        $scores = $('#scores');
+        $turn = $('#turn');
+        $num = $('#num');
+        $deck = $('#deck');
+        $iDiv = $('#iImg');
+        $oponnentDiv = $('#oponnentImg');
+        $oponnentImg = $('#oponnentImg img');
+        $oponnentName = $('#oponnent-name');
+        $tabChatGame = $('#tab-chat-game');
+        $tabChatGame2 = $('#tab-chat-game2');
+        $tabs = $('#tabs');
+        $tabs2 = $('#tabs2');
+        $modalTrigger = $('#trigger');
+        $gameAlert = $('#game-alert');
+        $finish = $('#finish');
+        $finishText = $('#finish-text');
+        $finishOponnentImg = $('#finish-oponnent-img');
+        $finishOponnentName = $('#finish-oponnent-name');
+        $finishOponnentScore = $('#finish-oponnent-score');
+        $finishMyScore = $('#finish-my-score');
+        $imgW = $('#winner');
+        $imgL = $('#loser');
+        $imgD = $('#draw');
+        oneTime = true;
+        $oponnentOver = $('#oponnent-over');
+        $myOver = $('#my-over');
+        restCards = 40;
+        soundDistribute = document.getElementById('s-distribute');;
+        soundDraw = document.getElementById('s-draw');
+        soundFlip = document.getElementById('s-flip');
+        soundLose = document.getElementById('s-lose');
+        soundWin = document.getElementById('s-win');
+        soundBg = document.getElementById('s-bg');
+        $msgsGame = $('.msgs-game');
+        /**
+         * 0 = mio, 1 = oponente
+         * @type {number}
+         */
+        turn = -1;
+
+        //load(soundDraw);
+        //load(soundFlip);
+        //load(soundLose);
+        //load(soundWin);
+
+        /**
+         * acciona la pestaña del chat la primera vez que
+         * se abre( solo el del diálogo)
+         */
+        $modalTrigger.click(function () {
+            if (oneTime) {
+                setTimeout(function () {
+                    if ($tabChatGame.hasClass('disabled')) {
+                        $tabs2.tabs('select_tab', 'c-general2');
+                    } else {
+                        $tabs2.tabs('select_tab', 'c-game2');
+                    }
+
+                    oneTime = false;
+                }, 100);
+            }
+        });
+
+        /**
+         * Envía al servidor la carta sobre la que se ha clickado
+         */
+        $myCards.click(".cards", function (ev) {
+            var elem = $(ev.target),
+                card = elem.data('card');
+            console.log('Ha intentado jugar: ' + card.id);
+            socket.emit('play', card.id);
+        });
+
+        $sample.click(function () {
+
+            if (restCards < 1)
+                return;
+
+            if (turn != 0) {
+                Materialize.toast('No es tu turno', 4000);
+                return;
+            }
+
+            var elem = $(this),
+                actualSample,
+                idCardToChange,
+                $elemCardToChange,
+                cardToChange;
+
+            // cojo la carta de muestra
+            actualSample = $sample.data('card');
+
+            // Compruebo si la muestra es mayor que la carta 7 => value: 5
+            if (actualSample.num.value > 5) {
+
+                // en función del palo de muestra, busco la carta 7 en la baraja
+                switch (actualSample.suit) {
+                    case 'espadas':
+                        idCardToChange = 7;
+                        break;
+                    case 'bastos':
+                        idCardToChange = 17;
+                        break;
+                    case 'oros':
+                        idCardToChange = 27;
+                        break;
+                    case 'copas':
+                        idCardToChange = 37;
+                        break;
+                }
+            } else {
+                // compruebo que la muestra es mayor que la carta 2 => value: 1
+                if (actualSample.num.value > 1) {
+                    // en función del palo de muestra, busco la carta 2 en la baraja
+                    switch (actualSample.suit) {
+                        case 'espadas':
+                            idCardToChange = 2;
+                            break;
+                        case 'bastos':
+                            idCardToChange = 12;
+                            break;
+                        case 'oros':
+                            idCardToChange = 22;
+                            break;
+                        case 'copas':
+                            idCardToChange = 32;
+                            break;
+                    }
+                }
+            }
+
+            // recojo el elemento de la carta necesitada para cambiar la brisca de la mano del usuario
+            $elemCardToChange = getElementCard(idCardToChange);
+
+            // si existe un elemento con esa carta
+            if ($elemCardToChange) {
+                cardToChange = $elemCardToChange.data('card');
+
+                // tengo la carta necesaria, así que la envío para cambiar
+                socket.emit('change sample', cardToChange.id);
+            } else {
+                switch (idCardToChange) {
+                    case 7:
+                    case 17:
+                    case 27:
+                    case 37:
+                        Materialize.toast('Necesitas el 7 de ' + actualSample.suit + ' para cambiar', 4000);
+                        break;
+                    case 2:
+                    case 12:
+                    case 22:
+                    case 32:
+                        Materialize.toast('Necesitas el 2 de ' + actualSample.suit + ' para cambiar', 4000);
+                        break;
+                }
+            }
+        });
+
+        /**
+         * Buscar una partida
+         * */
+        $search.click(function () {
+            socket.emit('search game');
+        });
+    });
+
+    //$(window).load(function () {
+        //soundBg.play();
+    //})
 
 })(window, undefined, $, socket, name);

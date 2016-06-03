@@ -8,10 +8,6 @@ global.users = [];
 global.sockets = [];
 global.games = [];
 
-http.listen(3000, function(){
-    console.log('listening on *:3000');
-});
-
 /**
  * Busca el usuario al que corresponde el socket
  * @param socket socket que corresponde a un usuario
@@ -30,3 +26,7 @@ global.getUserBySocket = function (socket) {
     }
     return undefined;
 };
+
+http.listen(3000, function(){
+    console.log('listening on *:3000');
+});

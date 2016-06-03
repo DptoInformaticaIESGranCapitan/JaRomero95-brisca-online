@@ -1,6 +1,4 @@
 {% extends 'layout.html.twig' %}
-{# TODO sonidos#}
-{#FIXME min-width del juego es superior a 320#}
 {% block stylesheets %}
     {{ parent() }}
 
@@ -179,7 +177,6 @@
 {% block scripts %}
     {{ parent() }}
     <script src="{{ asset('js/game3.js') }}"></script>
-    <script src="{{ asset('js/lib/jquery-ui.min.js') }}"></script>
     <script>
         $(document).ready(function () {
             $('.modal-trigger').leanModal();
@@ -188,6 +185,15 @@
 {% endblock %}
 
 {% block content %}
+{#TODO reiniciar chat de partida al comenzar una#}
+    {#TODO pie de pagina#}
+    {#comprobar funciomaniento del chat dialogo#}
+    <audio id="s-distribute" src="{{ asset('sounds/place.wav') }}"></audio>
+    <audio id="s-draw" src="{{ asset('sounds/draw.mp3') }}"></audio>
+    <audio id="s-flip" src="{{ asset('sounds/flip.mp3') }}"></audio>
+    <audio id="s-lose" src="{{ asset('sounds/lose.mp3') }}"></audio>
+    <audio id="s-win" src="{{ asset('sounds/win.mp3') }}"></audio>
+    <audio id="s-bg" loop="loop" src="{{ asset('sounds/bg.mp3') }}"></audio>
 
     {#chat modal: replicar para cambiar los id#}
     <div id="modal1" class="modal">
