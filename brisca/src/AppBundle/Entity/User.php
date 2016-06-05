@@ -109,14 +109,15 @@ class User implements UserInterface, \Serializable
      * @Assert\NotBlank
      * FIXME no muestra el error de la exp regular, pero sí funciona
      * @Assert\Regex(
-     *     pattern="/\w+/",
+     *     pattern="/^\w+$/",
+     *     htmlPattern = false,
      *     message="El nombre de usuario solo puede contener letras, números y guiones bajos"
      * )
      * @Assert\Length(
-     *     min=4,
-     *     max=15,
-     *     minMessage="El nombre de usuario debe contener al menos 4 caracteres",
-     *     maxMessage="El nombre de usuario debe contener como máximo 15 caracteres"
+     *     min=3,
+     *     max=8,
+     *     minMessage="El nombre de usuario debe contener al menos 3 caracteres",
+     *     maxMessage="El nombre de usuario debe contener como máximo 8 caracteres"
      * )
      */
     private $nick;

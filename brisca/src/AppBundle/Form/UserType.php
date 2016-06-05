@@ -49,7 +49,6 @@ class UserType extends AbstractType
      */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        // TODO: Implement setDefaultOptions() method.
     }
 
     /**
@@ -62,6 +61,5 @@ class UserType extends AbstractType
      */
     public function getName()
     {
-        // TODO: Implement getName() method.
     }
 }
