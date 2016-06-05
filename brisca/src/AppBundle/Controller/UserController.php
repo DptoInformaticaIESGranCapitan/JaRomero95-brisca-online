@@ -43,6 +43,10 @@ class UserController extends Controller
                 $rootDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/images';
                 $user->uploadImg($rootDir);
 
+                if(!$user->getImgPath()){
+                    $user->setImgPath('noUserImg.png');
+                }
+
                 $em->persist($user);
                 $em->flush();
 
