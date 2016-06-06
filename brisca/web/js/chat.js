@@ -75,7 +75,7 @@
         }
         return false;
     });
-// FIXME borrar mensajes si hay más de x = 100
+
     // Recibir mensaje chat general tanto derecha como dialogo
     socket.on('msg', function (msg) {
         $msgs.append($('<li>').html(

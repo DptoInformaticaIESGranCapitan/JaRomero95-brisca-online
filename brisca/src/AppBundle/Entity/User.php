@@ -107,7 +107,6 @@ class User implements UserInterface, \Serializable
      *
      * @ORM\Column(name="nick", type="string", length=15, unique=true)
      * @Assert\NotBlank
-     * FIXME no muestra el error de la exp regular, pero sí funciona
      * @Assert\Regex(
      *     pattern="/^\w+$/",
      *     htmlPattern = false,
@@ -282,7 +281,6 @@ class User implements UserInterface, \Serializable
      */
     public function eraseCredentials()
     {
-        // TODO: Implement eraseCredentials() method.
     }
 
     /** @see \Serializable::serialize() */

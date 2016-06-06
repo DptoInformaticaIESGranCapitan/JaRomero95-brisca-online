@@ -8,7 +8,6 @@ var numPlayers = 2,
     timeMargin = 2,
     timeTurn = 20;
 
-// TODO comprobar qué ocurre si el mismo jugador se conecta desde dos sitios (debería jugar el último conectado solo)
 function Game(io) {
     'use strict';
 

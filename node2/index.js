@@ -27,6 +27,6 @@ global.getUserBySocket = function (socket) {
     return undefined;
 };
 
-http.listen(3000, function(){
+http.listen(3000, '192.168.0.163', function(){
     console.log('listening on *:3000');
 });

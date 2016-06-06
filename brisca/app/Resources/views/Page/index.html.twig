@@ -3,12 +3,23 @@
 {% block scripts %}
     {{ parent() }}
     <script>
-        $(document).ready(function () {
-            $('.slider').slider({
+        $(function () {
+            var $container = $('.container-in-slider'),
+                $slider = $('.slider');
+
+            function resizeSlider() {
+                $slider.css('min-height', $container.outerHeight(true))
+            }
+
+            $(window).resize(resizeSlider);
+
+            $slider.slider({
                 full_width: true,
                 indicators: false
             });
         });
+
+
     </script>
 {% endblock %}
 

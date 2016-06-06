@@ -1,4 +1,0 @@
-wreck_them:
-    resource: "@WreckThemBundle/Resources/config/routing.yml"
-    prefix:   /
-

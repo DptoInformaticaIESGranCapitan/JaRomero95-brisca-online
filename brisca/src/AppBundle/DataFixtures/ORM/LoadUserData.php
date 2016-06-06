@@ -33,8 +33,9 @@ class LoadUserData implements FixtureInterface, ContainerAwareInterface
             $entity->setEmail($user['email']);
             $entity->setNick($user['nick']);
 
+            $str = 'noUserImg' . rand(1, 12) . '.png';
             if(!$entity->getImgPath()){
-                $entity->setImgPath('noUserImg.png');
+                $entity->setImgPath($str);
             }
 
             $manager->persist($entity);

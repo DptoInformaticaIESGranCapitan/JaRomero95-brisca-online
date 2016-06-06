@@ -44,7 +44,7 @@ class UserController extends Controller
                 $user->uploadImg($rootDir);
 
                 if(!$user->getImgPath()){
-                    $user->setImgPath('noUserImg.png');
+                    $user->setImgPath('noUserImg.png' . rand(1, 12));
                 }
 
                 $em->persist($user);
@@ -86,7 +86,7 @@ class UserController extends Controller
             $user->uploadImg($rootDir);
 
             if(!$user->getImgPath()){
-                $user->setImgPath('noUserImg.png');
+                $user->setImgPath('noUserImg.png' . rand(1, 12));
             }
 
             $em = $this->getDoctrine()->getManager();
@@ -94,9 +94,8 @@ class UserController extends Controller
 
             $em->persist($user);
             $em->flush();
-//            TODO flash éxito!
-            // ... do any other work - like sending them an email, etc
-            // maybe set a "flash" success message for the user
+
+            $this->addFlash('save', 'Tus cambios se han guardado');
         }
 
 

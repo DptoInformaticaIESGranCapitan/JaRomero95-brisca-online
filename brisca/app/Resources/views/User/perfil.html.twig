@@ -10,6 +10,13 @@
 
                 <p class="center">PERFIL</p>
 
+                {% for flash_message in app.session.flashBag.get('save') %}
+                    <div class="green lighten-4 green-text text-darken-2 paddings-m">
+                        <i class="material-icons" style="vertical-align: middle">done</i>
+                        {{ flash_message }}
+                    </div>
+                {% endfor %}
+
                 {% set errors = form_errors(form) %}
                 {% if errors %}
                     <div class="red lighten-4 red-text text-darken-2 paddings-m errors-container margin-bottom-m">
