@@ -4,7 +4,7 @@ $(function () {
 
     $window.load(function () {
             $('#load-layer').fadeOut();
-            $window.scrollTop(1);
+            window.scrollTo(1, 0);
         }
     );
 });

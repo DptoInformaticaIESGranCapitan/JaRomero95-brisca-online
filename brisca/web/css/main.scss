@@ -48,6 +48,10 @@ input:not([type]):focus:not([readonly])+label, input[type=text]:focus:not([reado
   width:1%;
 }
 
+.modal {
+  max-height: 88% !important;
+}
+
 .tabs .tab a {
   color: black;
 }
@@ -73,6 +77,7 @@ button:focus {
 
 body, html {
   min-width: 300px;
+  min-height: 540px;
 }
 
 #load-layer {

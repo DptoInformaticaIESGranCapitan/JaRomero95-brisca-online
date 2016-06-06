@@ -1,5 +1,5 @@
 var app = require('express')();
-var http = require('http').Server(app);
+var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 require('./listeners.js')(io);
@@ -27,6 +27,6 @@ global.getUserBySocket = function (socket) {
     return undefined;
 };
 
-http.listen(3000, '192.168.0.163', function(){
+http.listen(8000, '192.168.0.169', function(){
     console.log('listening on *:3000');
 });
