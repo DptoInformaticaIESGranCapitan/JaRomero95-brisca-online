@@ -24,7 +24,7 @@
     }
 
     function getChatMsg(username, msg) {
-        var float = (username === name) ? 'right' : '';
+        var float = (username === name) ? 'right' : 'left';
         return '<div class="chat-msg green lighten-5 ' + float + '">' +
             '<span class="msg-name green-text text-darken-4"><strong>' + username + '</strong></span><br/>' +
             '<span class="msg-msg">' + msg + '</span>' +
@@ -124,7 +124,14 @@
 
     socket.on('new user', function (user) {
         $msgs.append($('<li>').html(
-            '<strong>' + user + ' se ha conectado al chat</strong>'
+            '<div class="chat-msg green lighten-5 left">' +
+            '   <span class="msg-name green-text text-darken-4">' +
+            '       <strong>' +
+            '           ' + user + ' se ha conectado al chat' +
+            '       </strong>' +
+            '   </span>' +
+            '</div>' +
+            '<div style="clear: both"></div>'
         ));
     });
 })(window, undefined, $, socket);
